@@ -1,150 +1,184 @@
 import SwiftUI
+import SwiftData
 
 struct HighlightCard: View {
     let highlight: Highlight
     
-    // Generate a color based on book title for visual variety
+    // State for interactions
+    @State private var isHovered = false
+    @State private var isPressed = false
+    
+    // Theme colors that adapt to light and dark mode
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var themeColor: Color {
+        colorScheme == .dark 
+            ? Color(red: 52/255, green: 211/255, blue: 153/255) // Softer green tint for dark mode
+            : Color(red: 16/255, green: 185/255, blue: 129/255) // #10B981 for light mode
+    }
+    
+    private var lightThemeColor: Color {
+        themeColor.opacity(0.1)
+    }
+    
+    private var cardBackgroundColor: Color {
+        colorScheme == .dark
+            ? Color(red: 28/255, green: 28/255, blue: 30/255) // #1C1C1E for dark mode
+            : Color(red: 1, green: 1, blue: 1) // #FFFFFF for light mode
+    }
+    
+    private var primaryTextColor: Color {
+        Color.primary // Automatically adapts to light/dark mode
+    }
+    
+    private var secondaryTextColor: Color {
+        colorScheme == .dark
+            ? Color(red: 156/255, green: 163/255, blue: 175/255) // #9CA3AF for dark mode
+            : Color(red: 107/255, green: 114/255, blue: 128/255) // #6B7280 for light mode
+    }
+    
+    // Generate accent color based on book title for variety
     private var accentColor: Color {
-        guard let book = highlight.book else { return .blue }
-        let colors: [Color] = [.blue, .purple, .pink, .orange, .green, .cyan, .indigo]
+        guard let book = highlight.book else { return themeColor }
+        let colors: [Color] = [themeColor, .blue, .purple, .orange, .cyan, .indigo]
         let hash = abs(book.title.hashValue)
         return colors[hash % colors.count]
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Highlight content - enhanced with better typography and accent
+        VStack(alignment: .leading, spacing: 0) {
+            // Top row: Book title and date
+            HStack(alignment: .top) {
+                // Left-aligned book title
+                if let book = highlight.book {
+                    Text(book.title.uppercased())
+                        .font(.system(size: 12, weight: .medium, design: .default))
+                        .foregroundColor(accentColor)
+                        .textCase(.uppercase)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                // Right-aligned date in monospaced font
+                Text(highlight.createdDate, format: .dateTime.month(.abbreviated).day().year())
+                    .font(.system(size: 12, weight: .regular, design: .monospaced))
+                    .foregroundColor(secondaryTextColor)
+            }
+            .padding(.bottom, 12)
+            
+            // Main content with vertical accent bar
             HStack(alignment: .top, spacing: 0) {
-                // Colorful accent bar on the left
-                RoundedRectangle(cornerRadius: 2)
+                // Vertical accent bar aligned with first line of text
+                RoundedRectangle(cornerRadius: 1)
                     .fill(accentColor)
-                    .frame(width: 4)
+                    .frame(width: 3, height: 20)
                     .padding(.trailing, 12)
                 
-                Text(highlight.content)
-                    .font(.system(size: 16, weight: .regular, design: .default))
-                    .lineSpacing(2)
-                    .foregroundStyle(.primary)
-                    .lineLimit(nil)
-                    .multilineTextAlignment(.leading)
-            }
-            
-            // Personal note section - enhanced with modern styling
-            if let note = highlight.note, !note.isEmpty {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(.yellow)
-                        .font(.system(size: 14, weight: .medium))
-                        .padding(.top, 2)
+                VStack(alignment: .leading, spacing: 16) {
+                    // Main highlight text
+                    Text(highlight.content)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(primaryTextColor)
+                        .lineSpacing(6)
+                        .multilineTextAlignment(.leading)
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Personal Note")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(0.5)
-                        
-                        Text(note)
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(.secondary)
-                            .italic()
-                            .lineSpacing(1)
-                    }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.yellow.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(.yellow.opacity(0.3), lineWidth: 1)
-                        )
-                )
-            }
-            
-            // Book and metadata information - enhanced with colors and better layout
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    // Book info with colorful icon
-                    HStack(spacing: 6) {
-                        Image(systemName: "book.closed.fill")
-                            .foregroundStyle(accentColor)
-                            .font(.system(size: 12, weight: .medium))
-                        
-                        if let book = highlight.book {
-                            Text(book.title)
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.primary)
+                    // Optional personal note section
+                    if let note = highlight.note, !note.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Text("💭")
+                                .font(.system(size: 14))
+                                .padding(.top, 1)
                             
-                            Text("by \(book.author)")
-                                .font(.system(size: 13, weight: .regular))
-                                .foregroundStyle(.secondary)
+                            Text(note)
+                                .font(.body)
+                                .italic()
+                                .foregroundColor(secondaryTextColor)
+                                .lineSpacing(3)
+                                .multilineTextAlignment(.leading)
                         }
-                    }
-                    
-                    Spacer()
-                    
-                    // Date with icon
-                    HStack(spacing: 4) {
-                        Image(systemName: "calendar")
-                            .foregroundStyle(.secondary)
-                            .font(.system(size: 11))
-                        
-                        Text(highlight.createdDate, style: .date)
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                // Chapter info if available
-                if let chapter = highlight.chapter, !chapter.isEmpty {
-                    HStack(spacing: 6) {
-                        Image(systemName: "text.book.closed")
-                            .foregroundStyle(accentColor.opacity(0.7))
-                            .font(.system(size: 11, weight: .medium))
-                        
-                        Text(chapter)
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(.secondary)
                     }
                 }
             }
         }
-        .padding(20)
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(cardBackgroundColor)
+                .shadow(
+                    color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
+                    radius: isHovered ? 12 : 6,
+                    x: 0,
+                    y: isHovered ? 6 : 3
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(.gray.opacity(0.3), lineWidth: 0.5)
+                    // Subtle inner glow for dark mode, border for light mode
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            colorScheme == .dark
+                                ? LinearGradient(
+                                    colors: [accentColor.opacity(0.3), accentColor.opacity(0.1), Color.clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                : LinearGradient(
+                                    colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                            lineWidth: colorScheme == .dark ? 1 : 0.5
+                        )
                 )
         )
+        .scaleEffect(isHovered ? 1.01 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isHovered)
+        .animation(.easeInOut(duration: 0.15), value: isPressed)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+        .onTapGesture {
+            // Brief highlight animation on click
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = false
+                }
+            }
+        }
         .overlay(
-            // Subtle gradient overlay for depth
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [accentColor.opacity(0.02), .clear],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+            // Flash overlay for click animation
+            RoundedRectangle(cornerRadius: 12)
+                .fill(lightThemeColor)
+                .opacity(isPressed ? 0.3 : 0)
         )
     }
 }
 
 #Preview {
-    let book = Book(title: "Atomic Habits", author: "James Clear", assetId: "test")
-    let highlight = Highlight(
-        content: "You do not rise to the level of your goals. You fall to the level of your systems.",
-        note: "This is a key insight about habit formation",
-        chapter: "Chapter 1: The Surprising Power of Atomic Habits"
-    )
-    highlight.book = book
+    @Previewable @State var sampleHighlight: Highlight = {
+        let book = Book(title: "Atomic Habits", author: "James Clear", assetId: "test")
+        let highlight = Highlight(
+            content: "You do not rise to the level of your goals. You fall to the level of your systems.",
+            note: "This is a key insight about habit formation and building better systems",
+            chapter: "Chapter 1: The Surprising Power of Atomic Habits"
+        )
+        highlight.book = book
+        return highlight
+    }()
     
-    return HighlightCard(highlight: highlight)
-        .padding()
-        .frame(maxWidth: 400)
+    VStack(spacing: 20) {
+        // Light mode preview
+        HighlightCard(highlight: sampleHighlight)
+            .environment(\.colorScheme, .light)
+        
+        // Dark mode preview
+        HighlightCard(highlight: sampleHighlight)
+            .environment(\.colorScheme, .dark)
+    }
+    .padding()
+    .frame(maxWidth: 400)
+    .background(Color.gray.opacity(0.1))
 }
