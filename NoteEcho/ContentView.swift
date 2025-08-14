@@ -9,10 +9,11 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    // SwiftData environment - this gives us access to the database context
+    // SwiftData environment
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
-    // SwiftData queries - these automatically fetch and update data from the database
+    // SwiftData queries
     @Query private var books: [Book]
     @Query private var allHighlights: [Highlight]
     
@@ -21,6 +22,25 @@ struct ContentView: View {
     @State private var sortByNewest = true     // Sort direction: true = newest first, false = oldest first
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool // Track search field focus state
+    
+    // Theme colors that match HighlightCard styling
+    private var themeColor: Color {
+        colorScheme == .dark 
+            ? Color(red: 52/255, green: 211/255, blue: 153/255) // Softer green tint for dark mode
+            : Color(red: 16/255, green: 185/255, blue: 129/255) // #10B981 for light mode
+    }
+    
+    private var cardBackgroundColor: Color {
+        colorScheme == .dark
+            ? Color(red: 28/255, green: 28/255, blue: 30/255) // #1C1C1E for dark mode
+            : Color(red: 1, green: 1, blue: 1) // #FFFFFF for light mode
+    }
+    
+    private var secondaryTextColor: Color {
+        colorScheme == .dark
+            ? Color(red: 156/255, green: 163/255, blue: 175/255) // #9CA3AF for dark mode
+            : Color(red: 107/255, green: 114/255, blue: 128/255) // #6B7280 for light mode
+    }
     
     // Computed property that filters and sorts highlights based on current UI state
     // This automatically recalculates whenever any of the state variables change
@@ -52,7 +72,7 @@ struct ContentView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // MARK: - Filter and Sort Controls
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     // Search bar - enhanced styling with focus states and colors
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
@@ -80,7 +100,8 @@ struct ContentView: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
+                    .frame(height: 44)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(.regularMaterial)
@@ -93,8 +114,8 @@ struct ContentView: View {
                     .animation(.easeInOut(duration: 0.2), value: searchText.isEmpty)
                     
                     // Filter and sort controls row
-                    HStack {
-                        // Book filter dropdown menu - enhanced with colors and modern styling
+                    HStack(alignment: .center, spacing: 12) {
+                        // Book filter dropdown menu (takes flexible space)
                         Menu {
                             Button("All Books") {
                                 selectedBook = nil  // Setting to nil shows all books
@@ -109,32 +130,53 @@ struct ContentView: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: selectedBook != nil ? "book.closed.fill" : "book.closed")
-                                    .foregroundStyle(selectedBook != nil ? .blue : .secondary)
-                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(themeColor)
+                                    .font(.system(size: 12, weight: .medium))
                                 
                                 Text(selectedBook?.title ?? "All Books")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(selectedBook != nil ? .blue : .primary)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(themeColor)
                                 
                                 Image(systemName: "chevron.down")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(themeColor)
                                     .font(.system(size: 12, weight: .medium))
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 36)
                             .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(selectedBook != nil ? .blue.opacity(0.1) : .gray.opacity(0.05))
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(cardBackgroundColor)
+                                    .shadow(
+                                        color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
+                                        radius: 6,
+                                        x: 0,
+                                        y: 3
+                                    )
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(selectedBook != nil ? .blue.opacity(0.3) : .gray.opacity(0.3), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(
+                                                colorScheme == .dark
+                                                    ? LinearGradient(
+                                                        colors: [themeColor.opacity(0.3), themeColor.opacity(0.1), Color.clear],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                    : LinearGradient(
+                                                        colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+                                                        startPoint: .top,
+                                                        endPoint: .bottom
+                                                    ),
+                                                lineWidth: colorScheme == .dark ? 1 : 0.5
+                                            )
                                     )
                             )
                         }
+                        .buttonStyle(.plain)
                         
-                        Spacer()  // Push the sort button to the right
+                        Spacer()
                         
-                        // Sort direction toggle button - enhanced with colors and modern styling
+                        // Sort direction toggle button
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 sortByNewest.toggle()  // Flip between newest/oldest first
@@ -142,29 +184,48 @@ struct ContentView: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: sortByNewest ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
-                                    .foregroundStyle(sortByNewest ? .orange : .green)
-                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(themeColor)
+                                    .font(.system(size: 12, weight: .medium))
                                 
                                 Text(sortByNewest ? "Newest" : "Oldest")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(.primary)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(Color.primary)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .frame(width: 100, height: 36)
                             .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill((sortByNewest ? Color.orange : Color.green).opacity(0.1))
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(cardBackgroundColor)
+                                    .shadow(
+                                        color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
+                                        radius: 6,
+                                        x: 0,
+                                        y: 3
+                                    )
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke((sortByNewest ? Color.orange : Color.green).opacity(0.3), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(
+                                                colorScheme == .dark
+                                                    ? LinearGradient(
+                                                        colors: [themeColor.opacity(0.3), themeColor.opacity(0.1), Color.clear],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                    : LinearGradient(
+                                                        colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+                                                        startPoint: .top,
+                                                        endPoint: .bottom
+                                                    ),
+                                                lineWidth: colorScheme == .dark ? 1 : 0.5
+                                            )
                                     )
                             )
                         }
                     }
                 }
                 .padding(.horizontal)
-                .padding(.top, 12) // Add space from window title bar
-                .padding(.bottom, 8)
+                .padding(.top, 16) // Add space from window title bar
+                .padding(.bottom, 16) // Add consistent space to highlight cards
                 
                 // MARK: - Highlights Display Area
                 // Show either the highlights list or an empty state message
