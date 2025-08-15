@@ -73,15 +73,15 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 // MARK: - Filter and Sort Controls
                 VStack(spacing: 16) {
-                    // Search bar - enhanced styling with focus states and colors
-                    HStack(spacing: 10) {
+                    // Search bar - unified styling with filter/sort controls
+                    HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
-                            .foregroundStyle(isSearchFocused ? .blue : .secondary)
-                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(isSearchFocused ? themeColor : themeColor.opacity(0.7))
+                            .font(.system(size: 12, weight: .medium))
                         
                         TextField("Search highlights...", text: $searchText)
                             .textFieldStyle(.plain)
-                            .font(.body)
+                            .font(.system(size: 12, weight: .medium))
                             .focused($isSearchFocused) // Bind to focus state
                         
                         // Clear button when there's text
@@ -92,22 +92,44 @@ struct ContentView: View {
                                 }
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                                    .font(.system(size: 14))
+                                    .foregroundStyle(secondaryTextColor)
+                                    .font(.system(size: 12, weight: .medium))
                             }
                             .buttonStyle(.plain)
                             .transition(.scale.combined(with: .opacity))
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .frame(height: 44)
+                    .padding(.horizontal, 12)
+                    .frame(height: 36)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(.regularMaterial)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(cardBackgroundColor)
+                            .shadow(
+                                color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
+                                radius: 6,
+                                x: 0,
+                                y: 3
+                            )
                             .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(isSearchFocused ? .blue : .gray.opacity(0.3), lineWidth: isSearchFocused ? 2 : 1)
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(
+                                        colorScheme == .dark
+                                            ? LinearGradient(
+                                                colors: isSearchFocused 
+                                                    ? [themeColor.opacity(0.5), themeColor.opacity(0.3), themeColor.opacity(0.1)]
+                                                    : [themeColor.opacity(0.3), themeColor.opacity(0.1), Color.clear],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                            : LinearGradient(
+                                                colors: isSearchFocused
+                                                    ? [themeColor.opacity(0.3), themeColor.opacity(0.1)]
+                                                    : [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            ),
+                                        lineWidth: isSearchFocused ? 1.5 : (colorScheme == .dark ? 1 : 0.5)
+                                    )
                             )
                     )
                     .animation(.easeInOut(duration: 0.2), value: isSearchFocused)
@@ -135,7 +157,7 @@ struct ContentView: View {
                                 
                                 Text(selectedBook?.title ?? "All Books")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(themeColor)
+                                    .foregroundStyle(Color.primary)
                                 
                                 Image(systemName: "chevron.down")
                                     .foregroundStyle(themeColor)
@@ -192,7 +214,7 @@ struct ContentView: View {
                                     .foregroundStyle(Color.primary)
                             }
                             .padding(.horizontal, 12)
-                            .frame(width: 100, height: 36)
+                            .frame(height: 36)
                             .background(
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(cardBackgroundColor)
@@ -221,6 +243,7 @@ struct ContentView: View {
                                     )
                             )
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal)
@@ -249,7 +272,6 @@ struct ContentView: View {
                 } else {
                     // Highlights list - scrollable list of highlight cards
                     ScrollView {
-                        // LazyVStack only creates views as needed (good for performance)
                         LazyVStack(spacing: 20) {
                             ForEach(filteredHighlights, id: \.id) { highlight in
                                 HighlightCard(highlight: highlight)
@@ -266,7 +288,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Highlights")  // Sets the title in the navigation bar
+            .navigationTitle("NoteEcho")
             .onAppear {
                 // Populate with sample data when the view first appears
                 // This only runs once since MockDataService checks if data already exists
