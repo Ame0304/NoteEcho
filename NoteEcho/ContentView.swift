@@ -21,7 +21,7 @@ struct ContentView: View {
     @State private var selectedBook: Book?     // Currently selected book for filtering (nil = all books)
     @State private var sortByNewest = true     // Sort direction: true = newest first, false = oldest first
     @State private var searchText = ""
-    @FocusState private var isSearchFocused: Bool // Track search field focus state
+    @FocusState private var isSearchFocused: Bool
     
     // Theme colors that match HighlightCard styling
     private var themeColor: Color {
@@ -69,7 +69,11 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        ZStack {
+            // Blurred gradient background
+            BlurredGradientBackground()
+            
+            NavigationStack {
             VStack(spacing: 0) {
                 // MARK: - Filter and Sort Controls
                 VStack(spacing: 16) {
@@ -293,6 +297,115 @@ struct ContentView: View {
                 // Populate with sample data when the view first appears
                 // This only runs once since MockDataService checks if data already exists
                 MockDataService.populateWithSampleData(modelContext: modelContext)
+            }
+        }
+        }
+    }
+}
+
+// MARK: - Blurred Gradient Background Component
+struct BlurredGradientBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var themeColor: Color {
+        colorScheme == .dark 
+            ? Color(red: 52/255, green: 211/255, blue: 153/255) // Softer green tint for dark mode
+            : Color(red: 16/255, green: 185/255, blue: 129/255) // #10B981 for light mode
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Base background
+                (colorScheme == .dark ? Color.black : Color.white)
+                    .ignoresSafeArea()
+                
+                // Soft color blobs positioned primarily in lower half
+                Group {
+                    // Primary theme color blob - large, bottom right
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    themeColor.opacity(colorScheme == .dark ? 0.45 : 0.25), 
+                                    themeColor.opacity(colorScheme == .dark ? 0.12 : 0.05), 
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 50,
+                                endRadius: 200
+                            )
+                        )
+                        .frame(width: 400, height: 400)
+                        .position(
+                            x: geometry.size.width * 0.8,
+                            y: geometry.size.height * 0.85
+                        )
+                        .blur(radius: 40)
+                    
+                    // Soft blue blob - medium, bottom left
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color(red: 147/255, green: 197/255, blue: 253/255).opacity(colorScheme == .dark ? 0.4 : 0.2), // Soft blue
+                                    Color(red: 147/255, green: 197/255, blue: 253/255).opacity(colorScheme == .dark ? 0.1 : 0.05),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 30,
+                                endRadius: 150
+                            )
+                        )
+                        .frame(width: 300, height: 300)
+                        .position(
+                            x: geometry.size.width * 0.2,
+                            y: geometry.size.height * 0.9
+                        )
+                        .blur(radius: 35)
+                    
+                    // Warm peach blob - small, center bottom
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color(red: 254/255, green: 202/255, blue: 202/255).opacity(colorScheme == .dark ? 0.35 : 0.15), // Soft peach
+                                    Color(red: 254/255, green: 202/255, blue: 202/255).opacity(colorScheme == .dark ? 0.08 : 0.03),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 20,
+                                endRadius: 100
+                            )
+                        )
+                        .frame(width: 200, height: 200)
+                        .position(
+                            x: geometry.size.width * 0.5,
+                            y: geometry.size.height * 0.75
+                        )
+                        .blur(radius: 30)
+                    
+                    // Subtle purple blob - medium, right side
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color(red: 196/255, green: 181/255, blue: 253/255).opacity(colorScheme == .dark ? 0.38 : 0.18), // Soft purple
+                                    Color(red: 196/255, green: 181/255, blue: 253/255).opacity(colorScheme == .dark ? 0.09 : 0.04),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 40,
+                                endRadius: 120
+                            )
+                        )
+                        .frame(width: 250, height: 250)
+                        .position(
+                            x: geometry.size.width * 0.95,
+                            y: geometry.size.height * 0.65
+                        )
+                        .blur(radius: 32)
+                }
             }
         }
     }
