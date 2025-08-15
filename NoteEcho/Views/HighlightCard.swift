@@ -8,39 +8,25 @@ struct HighlightCard: View {
     @State private var isHovered = false
     @State private var isPressed = false
     
-    // Theme colors that adapt to light and dark mode
+    // Theme system integration
     @Environment(\.colorScheme) private var colorScheme
     
-    private var themeColor: Color {
-        colorScheme == .dark 
-            ? Color(red: 52/255, green: 211/255, blue: 153/255) // Softer green tint for dark mode
-            : Color(red: 16/255, green: 185/255, blue: 129/255) // #10B981 for light mode
+    private var theme: AppTheme {
+        AppTheme(colorScheme: colorScheme)
     }
     
     private var lightThemeColor: Color {
-        themeColor.opacity(0.1)
-    }
-    
-    private var cardBackgroundColor: Color {
-        colorScheme == .dark
-            ? Color(red: 28/255, green: 28/255, blue: 30/255) // #1C1C1E for dark mode
-            : Color(red: 1, green: 1, blue: 1) // #FFFFFF for light mode
+        theme.themeColor.opacity(0.1)
     }
     
     private var primaryTextColor: Color {
         Color.primary // Automatically adapts to light/dark mode
     }
     
-    private var secondaryTextColor: Color {
-        colorScheme == .dark
-            ? Color(red: 156/255, green: 163/255, blue: 175/255) // #9CA3AF for dark mode
-            : Color(red: 107/255, green: 114/255, blue: 128/255) // #6B7280 for light mode
-    }
-    
     // Generate accent color based on book title for variety
     private var accentColor: Color {
-        guard let book = highlight.book else { return themeColor }
-        let colors: [Color] = [themeColor, .blue, .purple, .orange, .cyan, .indigo]
+        guard let book = highlight.book else { return theme.themeColor }
+        let colors: [Color] = [theme.themeColor, .blue, .purple, .orange, .cyan, .indigo]
         let hash = abs(book.title.hashValue)
         return colors[hash % colors.count]
     }
@@ -63,7 +49,7 @@ struct HighlightCard: View {
                 // Right-aligned date in monospaced font
                 Text(highlight.createdDate, format: .dateTime.month(.abbreviated).day().year())
                     .font(.system(size: 12, weight: .regular, design: .monospaced))
-                    .foregroundColor(secondaryTextColor)
+                    .foregroundColor(theme.secondaryTextColor)
             }
             .padding(.bottom, 12)
             
@@ -94,7 +80,7 @@ struct HighlightCard: View {
                             Text(note)
                                 .font(.body)
                                 .italic()
-                                .foregroundColor(secondaryTextColor)
+                                .foregroundColor(theme.secondaryTextColor)
                                 .lineSpacing(3)
                                 .multilineTextAlignment(.leading)
                         }
@@ -105,7 +91,7 @@ struct HighlightCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(cardBackgroundColor)
+                .fill(theme.cardBackgroundColor)
                 .shadow(
                     color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
                     radius: isHovered ? 12 : 6,

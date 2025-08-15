@@ -39,14 +39,23 @@ NoteEchoApp (App entry point with ModelContainer)
 
 ### Key Components
 - **ContentView**: Main view with search, filtering, sorting, and highlight display logic
-- **HighlightCard**: Reusable component for displaying individual highlights with book metadata
+- **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
 - **MockDataService**: Populates sample data on first launch (5 books with multiple highlights each)
+
+### UI Design System
+- **Theme Colors**: Unified color palette with light/dark mode support
+  - Primary theme: Green (#10B981 light, softer tint for dark)
+  - Card backgrounds: White/dark mode appropriate (#FFFFFF/#1C1C1E)
+  - Secondary text: Adaptive gray tones for contrast
+- **Control Styling**: Consistent 36px height, 8px border radius, 12px padding
+- **Shadows & Borders**: Subtle shadows in light mode, gradient borders in dark mode
+- **Interactive States**: Hover effects, focus states, and smooth animations
 
 ### Data Flow
 - SwiftData `@Query` automatically fetches and updates data
 - `filteredHighlights` computed property handles search + book filtering + date sorting
 - State variables (`selectedBook`, `sortByNewest`, `searchText`) drive UI updates
-- Color theming based on book title hash for visual variety
+- Unified theming system ensures consistent visual appearance across components
 
 ## Development Guidelines
 
@@ -60,8 +69,16 @@ NoteEchoApp (App entry point with ModelContainer)
 - **SwiftData Relationships**: Bidirectional with `@Relationship(inverse:)` 
 - **Mock Data**: Service pattern for development data population
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
-- **Dynamic Theming**: Color generation based on book title hash
+- **Unified Design System**: Consistent theming across all UI components with shared color variables
 - **Focus Management**: `@FocusState` for search field interactions
+- **Responsive Layout**: Adaptive UI that works with flexible and fixed-width controls
+- **Animation Patterns**: Spring animations, asymmetric transitions, and smooth state changes
+
+### UI Implementation Notes
+- **Toolbar Controls**: Menu and Button use identical styling patterns for visual consistency
+- **Frame Management**: Separate `.frame()` calls for width/height to ensure proper SwiftUI rendering
+- **Background Layers**: Backgrounds applied at component level, not content level, for full-area coverage
+- **Color Accessibility**: All colors tested for contrast in both light and dark modes
 
 ### Testing Approach
 - **Unit Tests**: Swift Testing framework in NoteEchoTests/

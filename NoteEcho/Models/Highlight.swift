@@ -19,3 +19,4 @@ final class Highlight {
         self.createdDate = createdDate
     }
 }
+
