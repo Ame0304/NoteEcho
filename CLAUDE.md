@@ -29,16 +29,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### View Hierarchy
 ```
 NoteEchoApp (App entry point with ModelContainer)
-└── ContentView (Main interface)
-    ├── Search bar with focus states
-    ├── Filter controls (book selector + sort toggle)
-    └── Highlights display
-        ├── Empty state (when no highlights match filters)
-        └── ScrollView with LazyVStack of HighlightCard components
+└── ContentView (Main interface with HSplitView)
+    ├── BookSidebar (Fixed 200px width)
+    │   ├── "Books" header
+    │   ├── "All Books" option
+    │   └── Scrollable book list with selection states
+    └── MainContentArea (Flexible width)
+        ├── Top row: SearchBar + SortButton
+        └── Highlights display
+            ├── Empty state (when no highlights match filters)
+            └── ScrollView with LazyVStack of HighlightCard components
 ```
 
 ### Key Components
-- **ContentView**: Main view with search, filtering, sorting, and highlight display logic
+- **ContentView**: Main coordinator with HSplitView layout and state management
+- **BookSidebar**: Dedicated sidebar for book selection with hover and selection states
+- **MainContentArea**: Contains search/sort controls and highlights display area
 - **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
 - **MockDataService**: Populates sample data on first launch (5 books with multiple highlights each)
 
@@ -52,9 +58,11 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Interactive States**: Hover effects, focus states, and smooth animations
 
 ### Data Flow
-- SwiftData `@Query` automatically fetches and updates data
+- SwiftData `@Query` automatically fetches and updates data in ContentView
 - `filteredHighlights` computed property handles search + book filtering + date sorting
-- State variables (`selectedBook`, `sortByNewest`, `searchText`) drive UI updates
+- State variables (`selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
+- BookSidebar receives book selection state and updates it via binding
+- MainContentArea receives filtered highlights and search/sort state as parameters
 - Unified theming system ensures consistent visual appearance across components
 
 ## Development Guidelines
@@ -69,16 +77,22 @@ NoteEchoApp (App entry point with ModelContainer)
 - **SwiftData Relationships**: Bidirectional with `@Relationship(inverse:)` 
 - **Mock Data**: Service pattern for development data population
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
+- **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
+- **Component Architecture**: Modular components with clear separation of concerns
+- **State Management**: Centralized state in ContentView with binding propagation to child components
 - **Unified Design System**: Consistent theming across all UI components with shared color variables
 - **Focus Management**: `@FocusState` for search field interactions
 - **Responsive Layout**: Adaptive UI that works with flexible and fixed-width controls
 - **Animation Patterns**: Spring animations, asymmetric transitions, and smooth state changes
 
 ### UI Implementation Notes
-- **Toolbar Controls**: Menu and Button use identical styling patterns for visual consistency
+- **Sidebar Design**: Fixed-width (200px) with scrollable content, hover states, and selection indicators
+- **Main Content Layout**: Search and sort controls on same horizontal row for space efficiency
+- **Component Composition**: Clean separation between BookSidebar and MainContentArea for maintainability
 - **Frame Management**: Separate `.frame()` calls for width/height to ensure proper SwiftUI rendering
 - **Background Layers**: Backgrounds applied at component level, not content level, for full-area coverage
 - **Color Accessibility**: All colors tested for contrast in both light and dark modes
+- **Interactive States**: Consistent hover, selection, and focus feedback across all interactive elements
 
 ### Testing Approach
 - **Unit Tests**: Swift Testing framework in NoteEchoTests/
