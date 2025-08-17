@@ -48,11 +48,11 @@ struct BlurredGradientBackground: View {
                                     Color.clear
                                 ],
                                 center: .center,
-                                startRadius: 30,
-                                endRadius: 150
+                                startRadius: 50,
+                                endRadius: 180
                             )
                         )
-                        .frame(width: 300, height: 300)
+                        .frame(width: 400, height: 400)
                         .position(
                             x: geometry.size.width * 0.2,
                             y: geometry.size.height * 0.9
@@ -73,7 +73,7 @@ struct BlurredGradientBackground: View {
                                 endRadius: 100
                             )
                         )
-                        .frame(width: 200, height: 200)
+                        .frame(width: 300, height: 300)
                         .position(
                             x: geometry.size.width * 0.5,
                             y: geometry.size.height * 0.75

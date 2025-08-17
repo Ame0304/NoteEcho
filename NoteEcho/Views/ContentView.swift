@@ -60,7 +60,8 @@ struct ContentView: View {
                         searchText: $searchText,
                         isSearchFocused: $isSearchFocused,
                         sortByNewest: $sortByNewest,
-                        filteredHighlights: filteredHighlights
+                        filteredHighlights: filteredHighlights,
+                        allHighlights: allHighlights
                     )
                 }
                 .navigationTitle("NoteEcho")

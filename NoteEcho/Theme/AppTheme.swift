@@ -25,13 +25,13 @@ struct AppTheme {
     var gradientOpacities: GradientOpacities {
         GradientOpacities(
             themeColorPrimary: colorScheme == .dark ? 0.45 : 0.25,
-            themeColorSecondary: colorScheme == .dark ? 0.12 : 0.05,
-            softBluePrimary: colorScheme == .dark ? 0.4 : 0.2,
-            softBlueSecondary: colorScheme == .dark ? 0.1 : 0.05,
+            themeColorSecondary: colorScheme == .dark ? 0.2 : 0.1,
+            softBluePrimary: colorScheme == .dark ? 0.45 : 0.3,
+            softBlueSecondary: colorScheme == .dark ? 0.2 : 0.1,
             warmPeachPrimary: colorScheme == .dark ? 0.35 : 0.15,
-            warmPeachSecondary: colorScheme == .dark ? 0.08 : 0.03,
+            warmPeachSecondary: colorScheme == .dark ? 0.2 : 0.1,
             subtlePurplePrimary: colorScheme == .dark ? 0.38 : 0.18,
-            subtlePurpleSecondary: colorScheme == .dark ? 0.09 : 0.04
+            subtlePurpleSecondary: colorScheme == .dark ? 0.2 : 0.1
         )
     }
     

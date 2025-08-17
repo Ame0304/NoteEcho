@@ -6,6 +6,7 @@ struct MainContentArea: View {
     @FocusState.Binding var isSearchFocused: Bool
     @Binding var sortByNewest: Bool
     let filteredHighlights: [Highlight]
+    let allHighlights: [Highlight] // Added for daily echo selection
     @Environment(\.colorScheme) private var colorScheme
     
     private var theme: AppTheme {
@@ -14,6 +15,14 @@ struct MainContentArea: View {
     
     var body: some View {
         VStack(spacing: 0) {
+            // MARK: - Daily Echo Section
+            if let dailyHighlight = allHighlights.dailyRandomHighlight {
+                DailyEchoCard(highlight: dailyHighlight)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
+            }
+            
             // MARK: - Search and Sort Controls
             HStack(spacing: AppTheme.UIConstants.controlSpacing) {
                 // Search bar (flexible width)
