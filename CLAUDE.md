@@ -71,7 +71,7 @@ NoteEchoApp (App entry point with ModelContainer)
 - **ContentView**: Main coordinator with HSplitView layout and state management
 - **BookSidebar**: Dedicated sidebar for book selection with hover and selection states
 - **MainContentArea**: Contains Daily Echo section, search/sort controls, and highlights display area
-- **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling and unified card design
+- **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling, unified card design, and regenerate button with smooth rotation animations
 - **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
 - **MockDataService**: Populates sample data on first launch (5 books with multiple highlights each)
 
@@ -91,7 +91,7 @@ NoteEchoApp (App entry point with ModelContainer)
 - State variables (`selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
 - BookSidebar receives book selection state and updates it via binding
 - MainContentArea receives both filtered highlights and all highlights for daily selection
-- Daily Echo uses date-based seeding to show consistent random highlight throughout the day
+- Daily Echo uses date-based seeding to show consistent random highlight throughout the day with manual regenerate option
 - Unified theming system ensures consistent visual appearance across components
 
 ## Development Guidelines
@@ -108,13 +108,13 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
 - **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
-- **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension
+- **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension with regenerate override capability
 - **Unified Card Design**: Content extraction pattern to avoid nested styling while maintaining functionality
 - **State Management**: Centralized state in ContentView with binding propagation to child components
 - **Unified Design System**: Consistent theming across all UI components with shared color variables
 - **Focus Management**: `@FocusState` for search field interactions
 - **Responsive Layout**: Adaptive UI that works with flexible and fixed-width controls
-- **Animation Patterns**: Spring animations, asymmetric transitions, and smooth state changes
+- **Animation Patterns**: Smooth easing curves for rotations, asymmetric transitions, and polished interactive feedback
 
 ### UI Implementation Notes
 - **Sidebar Design**: Fixed-width (200px) with scrollable content, hover states, and selection indicators
