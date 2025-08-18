@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Philosophy
+
+### Core Beliefs
+
+- **Incremental progress over big bangs** - Small changes that compile and pass tests
+- **Learning from existing code** - Study and plan before implementing
+- **Pragmatic over dogmatic** - Adapt to project reality
+- **Clear intent over clever code** - Be boring and obvious
+
+## Project Integration
+
+### Learning the Codebase
+
+- Find 3 similar features/components
+- Identify common patterns and conventions
+- Use same libraries/utilities when possible
+- Follow existing test patterns
+
+### Tooling
+
+- Use project's existing build system
+- Use project's test framework
+- Use project's formatter/linter settings
+- Don't introduce new tools without strong justification
+
 ## Project Overview
 
 **NoteEcho** is a SwiftUI macOS application for managing and viewing book highlights. Users can search, filter by book, and sort highlights from their reading library.
@@ -35,7 +60,8 @@ NoteEchoApp (App entry point with ModelContainer)
     │   ├── "All Books" option
     │   └── Scrollable book list with selection states
     └── MainContentArea (Flexible width)
-        ├── Top row: SearchBar + SortButton
+        ├── Daily Echo section (DailyEchoCard with random daily highlight)
+        ├── Search and sort controls row: SearchBar + SortButton
         └── Highlights display
             ├── Empty state (when no highlights match filters)
             └── ScrollView with LazyVStack of HighlightCard components
@@ -44,7 +70,8 @@ NoteEchoApp (App entry point with ModelContainer)
 ### Key Components
 - **ContentView**: Main coordinator with HSplitView layout and state management
 - **BookSidebar**: Dedicated sidebar for book selection with hover and selection states
-- **MainContentArea**: Contains search/sort controls and highlights display area
+- **MainContentArea**: Contains Daily Echo section, search/sort controls, and highlights display area
+- **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling and unified card design
 - **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
 - **MockDataService**: Populates sample data on first launch (5 books with multiple highlights each)
 
@@ -60,9 +87,11 @@ NoteEchoApp (App entry point with ModelContainer)
 ### Data Flow
 - SwiftData `@Query` automatically fetches and updates data in ContentView
 - `filteredHighlights` computed property handles search + book filtering + date sorting
+- `allHighlights` passed to MainContentArea for Daily Echo random selection
 - State variables (`selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
 - BookSidebar receives book selection state and updates it via binding
-- MainContentArea receives filtered highlights and search/sort state as parameters
+- MainContentArea receives both filtered highlights and all highlights for daily selection
+- Daily Echo uses date-based seeding to show consistent random highlight throughout the day
 - Unified theming system ensures consistent visual appearance across components
 
 ## Development Guidelines
@@ -79,6 +108,8 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
 - **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
+- **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension
+- **Unified Card Design**: Content extraction pattern to avoid nested styling while maintaining functionality
 - **State Management**: Centralized state in ContentView with binding propagation to child components
 - **Unified Design System**: Consistent theming across all UI components with shared color variables
 - **Focus Management**: `@FocusState` for search field interactions
@@ -87,8 +118,10 @@ NoteEchoApp (App entry point with ModelContainer)
 
 ### UI Implementation Notes
 - **Sidebar Design**: Fixed-width (200px) with scrollable content, hover states, and selection indicators
-- **Main Content Layout**: Search and sort controls on same horizontal row for space efficiency
+- **Daily Echo Layout**: Featured section at top with unified card design, enhanced styling, and theme color consistency
+- **Main Content Layout**: Daily Echo above search/sort controls for prominent positioning and user attention
 - **Component Composition**: Clean separation between BookSidebar and MainContentArea for maintainability
+- **Unified Styling**: Content extraction pattern prevents nested card effects while preserving component behavior
 - **Frame Management**: Separate `.frame()` calls for width/height to ensure proper SwiftUI rendering
 - **Background Layers**: Backgrounds applied at component level, not content level, for full-area coverage
 - **Color Accessibility**: All colors tested for contrast in both light and dark modes
@@ -101,6 +134,11 @@ NoteEchoApp (App entry point with ModelContainer)
 
 ## File Structure
 - **NoteEcho/**: Main app source code
+  - **Views/**: Core view components (ContentView, HighlightCard, DailyEchoCard)
+  - **Components/**: Reusable UI components (BookSidebar, MainContentArea, SearchBar)
+  - **Extensions/**: Swift extensions (Array+DailySelection for daily random logic)
+  - **Models/**: SwiftData models (Book, Highlight, MockDataService)
+  - **Theme/**: Design system (AppTheme, Colors, BlurredGradientBackground)
 - **NoteEchoTests/**: Unit tests using Swift Testing
 - **NoteEchoUITests/**: UI tests using XCTest
 - **Assets.xcassets/**: App icons and asset catalog

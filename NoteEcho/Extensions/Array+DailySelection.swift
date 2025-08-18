@@ -22,4 +22,24 @@ extension Array where Element == Highlight {
         let index = abs(seed) % count
         return self[index]
     }
+    
+    // Get a random highlight excluding a specific highlight ID (for regenerate functionality)
+    func randomHighlightExcluding(_ excludeId: String?) -> Highlight? {
+        guard !isEmpty else { return nil }
+        
+        // If no exclusion needed, return any random highlight
+        guard let excludeId = excludeId else {
+            return self.randomElement()
+        }
+        
+        // Filter out the excluded highlight
+        let availableHighlights = self.filter { $0.id != excludeId }
+        
+        // If no other highlights available, return the original (shouldn't happen in normal use)
+        guard !availableHighlights.isEmpty else {
+            return self.randomElement()
+        }
+        
+        return availableHighlights.randomElement()
+    }
 }

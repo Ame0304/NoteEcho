@@ -9,15 +9,30 @@ struct MainContentArea: View {
     let allHighlights: [Highlight] // Added for daily echo selection
     @Environment(\.colorScheme) private var colorScheme
     
+    // Override state for manual daily echo regeneration
+    @State private var overrideHighlightId: String?
+    
     private var theme: AppTheme {
         AppTheme(colorScheme: colorScheme)
+    }
+    
+    // Computed property for current daily echo highlight
+    private var currentDailyHighlight: Highlight? {
+        // If we have an override, try to find it in allHighlights
+        if let overrideId = overrideHighlightId,
+           let overrideHighlight = allHighlights.first(where: { $0.id == overrideId }) {
+            return overrideHighlight
+        }
+        
+        // Otherwise, use the daily selection
+        return allHighlights.dailyRandomHighlight
     }
     
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Daily Echo Section
-            if let dailyHighlight = allHighlights.dailyRandomHighlight {
-                DailyEchoCard(highlight: dailyHighlight)
+            if let dailyHighlight = currentDailyHighlight {
+                DailyEchoCard(highlight: dailyHighlight, onRegenerate: regenerateDailyEcho)
                     .padding(.horizontal)
                     .padding(.top, 16)
                     .padding(.bottom, 8)
@@ -82,6 +97,19 @@ struct MainContentArea: View {
                     .padding(.top, 8)
                     .padding(.bottom, 20)
                 }
+            }
+        }
+    }
+    
+    // MARK: - Regenerate Daily Echo
+    private func regenerateDailyEcho() {
+        // Get current highlight ID to exclude from new selection
+        let currentId = currentDailyHighlight?.id
+        
+        // Get a new random highlight excluding the current one
+        if let newHighlight = allHighlights.randomHighlightExcluding(currentId) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                overrideHighlightId = newHighlight.id
             }
         }
     }

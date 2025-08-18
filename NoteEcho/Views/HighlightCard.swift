@@ -92,12 +92,6 @@ struct HighlightCard: View {
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(theme.cardBackgroundColor)
-                .shadow(
-                    color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
-                    radius: isHovered ? 12 : 6,
-                    x: 0,
-                    y: isHovered ? 6 : 3
-                )
                 .overlay(
                     // Subtle inner glow for dark mode, border for light mode
                     RoundedRectangle(cornerRadius: 12)

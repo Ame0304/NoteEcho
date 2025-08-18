@@ -3,6 +3,7 @@ import SwiftData
 
 struct DailyEchoCard: View {
     let highlight: Highlight?
+    let onRegenerate: (() -> Void)?
     
     // Theme system integration
     @Environment(\.colorScheme) private var colorScheme
@@ -10,6 +11,8 @@ struct DailyEchoCard: View {
     // State for interactions (moved from HighlightCard)
     @State private var isHovered = false
     @State private var isPressed = false
+    @State private var isRegenerateButtonHovered = false
+    @State private var regenerateRotation: Double = 0
     
     private var theme: AppTheme {
         AppTheme(colorScheme: colorScheme)
@@ -38,6 +41,35 @@ struct DailyEchoCard: View {
                         .textCase(.uppercase)
                     
                     Spacer()
+                    
+                    // Regenerate button
+                    if let onRegenerate = onRegenerate {
+                        Button(action: {
+                            // Add click rotation animation with smooth easeOut
+                            withAnimation(.easeOut(duration: 0.4)) {
+                                regenerateRotation += 360
+                            }
+                            onRegenerate()
+                        }) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(isRegenerateButtonHovered ? theme.themeColor : theme.themeColor.opacity(0.8))
+                                .background(
+                                    Circle()
+                                        .fill(theme.themeColor.opacity(isRegenerateButtonHovered ? 0.1 : 0))
+                                        .frame(width: 24, height: 24)
+                                )
+                                .rotationEffect(.degrees(isRegenerateButtonHovered ? 180 : 0))
+                                .animation(.easeInOut(duration: 0.25), value: isRegenerateButtonHovered)
+                                .rotationEffect(.degrees(regenerateRotation))
+                                .animation(.easeOut(duration: 0.4), value: regenerateRotation)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Get a new random highlight")
+                        .onHover { hovering in
+                            isRegenerateButtonHovered = hovering
+                        }
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
@@ -118,6 +150,23 @@ struct DailyEchoCard: View {
                             .textCase(.uppercase)
                         
                         Spacer()
+                        
+                        // Regenerate button (disabled in empty state)
+                        if let onRegenerate = onRegenerate {
+                            Button(action: onRegenerate) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(theme.themeColor.opacity(0.3))
+                                    .background(
+                                        Circle()
+                                            .fill(Color.clear)
+                                            .frame(width: 24, height: 24)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(true)
+                            .help("No highlights available")
+                        }
                     }
                     .padding(.bottom, 8)
                     
@@ -216,15 +265,15 @@ struct DailyEchoCard: View {
     
     VStack(spacing: 20) {
         // Light mode preview with highlight
-        DailyEchoCard(highlight: sampleHighlight)
+        DailyEchoCard(highlight: sampleHighlight, onRegenerate: { print("Regenerate tapped") })
             .environment(\.colorScheme, .light)
         
         // Dark mode preview with highlight
-        DailyEchoCard(highlight: sampleHighlight)
+        DailyEchoCard(highlight: sampleHighlight, onRegenerate: { print("Regenerate tapped") })
             .environment(\.colorScheme, .dark)
         
         // Empty state preview
-        DailyEchoCard(highlight: nil)
+        DailyEchoCard(highlight: nil, onRegenerate: { print("Regenerate tapped") })
             .environment(\.colorScheme, .light)
     }
     .padding()
