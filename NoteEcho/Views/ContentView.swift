@@ -66,9 +66,8 @@ struct ContentView: View {
                 }
                 .navigationTitle("NoteEcho")
                 .onAppear {
-                    // Populate with sample data when the view first appears
-                    // This only runs once since MockDataService checks if data already exists
-                    MockDataService.populateWithSampleData(modelContext: modelContext)
+                    // Populate with Apple Books data when the view first appears
+                    AppleBooksDataService.populateWithAppleBooksData(modelContext: modelContext)
                 }
             }
         }
