@@ -38,7 +38,7 @@ struct HighlightCard: View {
                 // Left-aligned book title
                 if let book = highlight.book {
                     Text(book.title.uppercased())
-                        .font(.system(size: 12, weight: .medium, design: .default))
+                        .appFont(AppTypography.captionMedium)
                         .foregroundColor(accentColor)
                         .textCase(.uppercase)
                         .lineLimit(1)
@@ -48,7 +48,7 @@ struct HighlightCard: View {
                 
                 // Right-aligned date in monospaced font
                 Text(highlight.createdDate, format: .dateTime.month(.abbreviated).day().year())
-                    .font(.system(size: 12, weight: .regular, design: .monospaced))
+                    .appFont(AppTypography.timestamp)
                     .foregroundColor(theme.secondaryTextColor)
             }
             .padding(.bottom, 12)
@@ -64,8 +64,7 @@ struct HighlightCard: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Main highlight text
                     Text(highlight.content)
-                        .font(.title3)
-                        .fontWeight(.regular)
+                        .appFont(AppTypography.title3Rounded)
                         .foregroundColor(primaryTextColor)
                         .lineSpacing(6)
                         .multilineTextAlignment(.leading)
@@ -74,11 +73,11 @@ struct HighlightCard: View {
                     if let note = highlight.note, !note.isEmpty {
                         HStack(alignment: .top, spacing: 8) {
                             Text("💭")
-                                .font(.system(size: 14))
+                                .appFont(AppTypography.body)
                                 .padding(.top, 1)
                             
                             Text(note)
-                                .font(.body)
+                                .appFont(AppTypography.bodyRounded)
                                 .italic()
                                 .foregroundColor(theme.secondaryTextColor)
                                 .lineSpacing(3)

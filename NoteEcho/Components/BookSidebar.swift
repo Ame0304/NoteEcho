@@ -15,7 +15,7 @@ struct BookSidebar: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             Text("Books")
-                .font(.system(size: 14, weight: .semibold))
+                .appFont(AppTypography.bodyBold)
                 .foregroundStyle(theme.themeColor)
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -98,7 +98,7 @@ private struct BookListItem: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Text(title)
-                    .font(.system(size: 12, weight: .medium))
+                    .appFont(AppTypography.captionMedium)
                     .foregroundStyle(isSelected ? Color.white :Color.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)

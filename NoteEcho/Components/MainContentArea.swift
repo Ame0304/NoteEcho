@@ -68,14 +68,14 @@ struct MainContentArea: View {
                 // Empty state
                 VStack(spacing: 16) {
                     Image(systemName: "highlighter")
-                        .font(.system(size: 48))
+                        .appFont(AppTypography.largeTitle)
                         .foregroundStyle(.secondary)
                     Text("No highlights found")
-                        .font(.title2)
+                        .appFont(AppTypography.title2Rounded)
                         .foregroundStyle(.secondary)
                     if !searchText.isEmpty {
                         Text("Try adjusting your search")
-                            .font(.body)
+                            .appFont(AppTypography.bodyRounded)
                             .foregroundStyle(.tertiary)
                     }
                 }
@@ -124,10 +124,10 @@ private struct SortButtonLabel: View {
         HStack(spacing: AppTheme.UIConstants.searchSpacing) {
             Image(systemName: sortByNewest ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(theme.themeColor)
-                .font(.system(size: 12, weight: .medium))
+                .appFont(AppTypography.captionMedium)
             
             Text(sortByNewest ? "Newest" : "Oldest")
-                .font(.system(size: 12, weight: .medium))
+                .appFont(AppTypography.captionMedium)
                 .foregroundStyle(Color.primary)
         }
         .padding(.horizontal, AppTheme.UIConstants.controlPadding)

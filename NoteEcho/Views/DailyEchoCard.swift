@@ -32,11 +32,11 @@ struct DailyEchoCard: View {
                 // Daily Echo Header
                 HStack(spacing: 8) {
                     Image(systemName: "star.circle.fill")
-                        .font(.system(size: 16, weight: .medium))
+                        .appFont(AppTypography.headline)
                         .foregroundColor(theme.themeColor)
                     
                     Text("DAILY ECHO")
-                        .font(.system(size: 14, weight: .bold, design: .default))
+                        .appFont(AppTypography.bodyBold)
                         .foregroundColor(theme.themeColor)
                         .textCase(.uppercase)
                     
@@ -52,7 +52,7 @@ struct DailyEchoCard: View {
                             onRegenerate()
                         }) {
                             Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 14, weight: .medium))
+                                .appFont(AppTypography.bodyMedium)
                                 .foregroundColor(isRegenerateButtonHovered ? theme.themeColor : theme.themeColor.opacity(0.8))
                                 .background(
                                     Circle()
@@ -82,7 +82,7 @@ struct DailyEchoCard: View {
                         // Left-aligned book title
                         if let book = highlight.book {
                             Text(book.title.uppercased())
-                                .font(.system(size: 12, weight: .medium, design: .default))
+                                .appFont(AppTypography.captionMedium)
                                 .foregroundColor(theme.themeColor) // Use theme color consistently
                                 .textCase(.uppercase)
                                 .lineLimit(1)
@@ -92,7 +92,7 @@ struct DailyEchoCard: View {
                         
                         // Right-aligned date in monospaced font
                         Text(highlight.createdDate, format: .dateTime.month(.abbreviated).day().year())
-                            .font(.system(size: 12, weight: .regular, design: .monospaced))
+                            .appFont(AppTypography.timestamp)
                             .foregroundColor(theme.secondaryTextColor)
                     }
                     .padding(.bottom, 12)
@@ -108,8 +108,7 @@ struct DailyEchoCard: View {
                         VStack(alignment: .leading, spacing: 16) {
                             // Main highlight text
                             Text(highlight.content)
-                                .font(.title3)
-                                .fontWeight(.semibold)
+                                .appFont(AppTypography.title3SemiboldRounded)
                                 .foregroundColor(primaryTextColor)
                                 .lineSpacing(6)
                                 .multilineTextAlignment(.leading)
@@ -118,11 +117,11 @@ struct DailyEchoCard: View {
                             if let note = highlight.note, !note.isEmpty {
                                 HStack(alignment: .top, spacing: 8) {
                                     Text("💭")
-                                        .font(.system(size: 14))
+                                        .appFont(AppTypography.body)
                                         .padding(.top, 1)
                                     
                                     Text(note)
-                                        .font(.body)
+                                        .appFont(AppTypography.bodyRounded)
                                         .italic()
                                         .foregroundColor(theme.secondaryTextColor)
                                         .lineSpacing(3)
@@ -141,11 +140,11 @@ struct DailyEchoCard: View {
                     // Daily Echo Header (even in empty state)
                     HStack(spacing: 8) {
                         Image(systemName: "star.circle.fill")
-                            .font(.system(size: 16, weight: .medium))
+                            .appFont(AppTypography.headline)
                             .foregroundColor(theme.themeColor)
                         
                         Text("DAILY ECHO")
-                            .font(.system(size: 14, weight: .bold, design: .default))
+                            .appFont(AppTypography.bodyBold)
                             .foregroundColor(theme.themeColor)
                             .textCase(.uppercase)
                         
@@ -155,7 +154,7 @@ struct DailyEchoCard: View {
                         if let onRegenerate = onRegenerate {
                             Button(action: onRegenerate) {
                                 Image(systemName: "arrow.clockwise")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .appFont(AppTypography.bodyMedium)
                                     .foregroundColor(theme.themeColor.opacity(0.3))
                                     .background(
                                         Circle()
@@ -173,11 +172,11 @@ struct DailyEchoCard: View {
                     // Empty state content
                     VStack(spacing: 12) {
                         Image(systemName: "star.circle")
-                            .font(.system(size: 32))
+                            .appFont(AppTypography.title)
                             .foregroundStyle(.secondary)
                         
                         Text("No highlights available for today's echo")
-                            .font(.body)
+                            .appFont(AppTypography.bodyRounded)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }

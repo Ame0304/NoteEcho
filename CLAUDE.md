@@ -114,7 +114,7 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Unified Design System**: Consistent theming across all UI components with shared color variables
 - **Focus Management**: `@FocusState` for search field interactions
 - **Responsive Layout**: Adaptive UI that works with flexible and fixed-width controls
-- **Animation Patterns**: Smooth easing curves for rotations, asymmetric transitions, and polished interactive feedback
+- **Animation Patterns**: Smooth easing curves for rotations, asymmetric transitions, hover border effects, and polished interactive feedback
 
 ### UI Implementation Notes
 - **Sidebar Design**: Fixed-width (200px) with scrollable content, hover states, and selection indicators
@@ -126,6 +126,7 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Background Layers**: Backgrounds applied at component level, not content level, for full-area coverage
 - **Color Accessibility**: All colors tested for contrast in both light and dark modes
 - **Interactive States**: Consistent hover, selection, and focus feedback across all interactive elements
+- **Hover Effects**: HighlightCard displays green theme color border on hover with smooth .easeInOut animations, maintaining visual consistency with DailyEchoCard styling
 
 ### Testing Approach
 - **Unit Tests**: Swift Testing framework in NoteEchoTests/

@@ -14,11 +14,11 @@ struct SearchBar: View {
         HStack(spacing: AppTheme.UIConstants.searchSpacing) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(isSearchFocused ? theme.themeColor : theme.themeColor.opacity(0.7))
-                .font(.system(size: 12, weight: .medium))
+                .appFont(AppTypography.captionMedium)
             
             TextField("Search highlights...", text: $searchText)
                 .textFieldStyle(.plain)
-                .font(.system(size: 12, weight: .medium))
+                .appFont(AppTypography.captionMedium)
                 .focused($isSearchFocused)
             
             // Clear button when there's text
@@ -30,7 +30,7 @@ struct SearchBar: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(theme.secondaryTextColor)
-                        .font(.system(size: 12, weight: .medium))
+                        .appFont(AppTypography.captionMedium)
                 }
                 .buttonStyle(.plain)
                 .transition(.scale.combined(with: .opacity))
