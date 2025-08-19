@@ -15,9 +15,9 @@ struct BlurredGradientBackground: View {
                 theme.primaryBackgroundColor
                     .ignoresSafeArea()
                 
-                // Soft color blobs positioned primarily in lower half
+                // Soft color blobs distributed across full window area
                 Group {
-                    // Primary theme color blob - large, bottom right
+                    // Primary theme color blob - large, left side mid-height
                     Circle()
                         .fill(
                             RadialGradient(
@@ -28,17 +28,17 @@ struct BlurredGradientBackground: View {
                                 ],
                                 center: .center,
                                 startRadius: 50,
-                                endRadius: 200
+                                endRadius: 225
                             )
                         )
-                        .frame(width: 400, height: 400)
+                        .frame(width: 450, height: 450)
                         .position(
-                            x: geometry.size.width * 0.8,
-                            y: geometry.size.height * 0.85
+                            x: geometry.size.width * 0.15,
+                            y: geometry.size.height * 0.4
                         )
-                        .blur(radius: 40)
+                        .blur(radius: 45)
                     
-                    // Soft blue blob - medium, bottom left
+                    // Soft blue blob - large, right side lower-mid
                     Circle()
                         .fill(
                             RadialGradient(
@@ -49,17 +49,17 @@ struct BlurredGradientBackground: View {
                                 ],
                                 center: .center,
                                 startRadius: 50,
-                                endRadius: 180
+                                endRadius: 225
                             )
                         )
-                        .frame(width: 400, height: 400)
+                        .frame(width: 450, height: 450)
                         .position(
-                            x: geometry.size.width * 0.2,
-                            y: geometry.size.height * 0.9
+                            x: geometry.size.width * 0.85,
+                            y: geometry.size.height * 0.7
                         )
-                        .blur(radius: 35)
+                        .blur(radius: 45)
                     
-                    // Warm peach blob - small, center bottom
+                    // Warm peach blob - accent, center upper-mid
                     Circle()
                         .fill(
                             RadialGradient(
@@ -76,30 +76,10 @@ struct BlurredGradientBackground: View {
                         .frame(width: 300, height: 300)
                         .position(
                             x: geometry.size.width * 0.5,
-                            y: geometry.size.height * 0.75
+                            y: geometry.size.height * 0.3
                         )
-                        .blur(radius: 30)
+                        .blur(radius: 35)
                     
-                    // Subtle purple blob - medium, right side
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    AppColors.GradientColors.subtlePurple.opacity(theme.gradientOpacities.subtlePurplePrimary),
-                                    AppColors.GradientColors.subtlePurple.opacity(theme.gradientOpacities.subtlePurpleSecondary),
-                                    Color.clear
-                                ],
-                                center: .center,
-                                startRadius: 40,
-                                endRadius: 120
-                            )
-                        )
-                        .frame(width: 250, height: 250)
-                        .position(
-                            x: geometry.size.width * 0.95,
-                            y: geometry.size.height * 0.65
-                        )
-                        .blur(radius: 32)
                 }
             }
         }

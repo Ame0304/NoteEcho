@@ -24,14 +24,12 @@ struct AppTheme {
     // MARK: - Gradient Blob Opacities
     var gradientOpacities: GradientOpacities {
         GradientOpacities(
-            themeColorPrimary: colorScheme == .dark ? 0.45 : 0.25,
-            themeColorSecondary: colorScheme == .dark ? 0.2 : 0.1,
-            softBluePrimary: colorScheme == .dark ? 0.45 : 0.3,
-            softBlueSecondary: colorScheme == .dark ? 0.2 : 0.1,
-            warmPeachPrimary: colorScheme == .dark ? 0.35 : 0.15,
-            warmPeachSecondary: colorScheme == .dark ? 0.2 : 0.1,
-            subtlePurplePrimary: colorScheme == .dark ? 0.38 : 0.18,
-            subtlePurpleSecondary: colorScheme == .dark ? 0.2 : 0.1
+            themeColorPrimary: colorScheme == .dark ? 0.45 : 0.15,
+            themeColorSecondary: colorScheme == .dark ? 0.25 : 0.1,
+            softBluePrimary: colorScheme == .dark ? 0.45 : 0.15,
+            softBlueSecondary: colorScheme == .dark ? 0.25 : 0.1,
+            warmPeachPrimary: colorScheme == .dark ? 0.45 : 0.25,
+            warmPeachSecondary: colorScheme == .dark ? 0.25 : 0.15,
         )
     }
     
@@ -59,8 +57,6 @@ struct GradientOpacities {
     let softBlueSecondary: Double
     let warmPeachPrimary: Double
     let warmPeachSecondary: Double
-    let subtlePurplePrimary: Double
-    let subtlePurpleSecondary: Double
 }
 
 // MARK: - SwiftUI Environment Key

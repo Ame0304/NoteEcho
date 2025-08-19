@@ -65,7 +65,7 @@ struct HighlightCard: View {
                     // Main highlight text
                     Text(highlight.content)
                         .font(.title3)
-                        .fontWeight(.semibold)
+                        .fontWeight(.regular)
                         .foregroundColor(primaryTextColor)
                         .lineSpacing(6)
                         .multilineTextAlignment(.leading)
@@ -93,22 +93,27 @@ struct HighlightCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(theme.cardBackgroundColor)
                 .overlay(
-                    // Subtle inner glow for dark mode, border for light mode
+                    // Theme color border on hover, subtle border otherwise
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(
-                            colorScheme == .dark
+                            isHovered
                                 ? LinearGradient(
-                                    colors: [accentColor.opacity(0.3), accentColor.opacity(0.1), Color.clear],
+                                    colors: colorScheme == .dark 
+                                        ? [theme.themeColor.opacity(0.4), theme.themeColor.opacity(0.2), Color.clear]
+                                        : [theme.themeColor.opacity(0.3), theme.themeColor.opacity(0.1)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                                 : LinearGradient(
-                                    colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+                                    colors: colorScheme == .dark
+                                        ? [Color.gray.opacity(0.2), Color.gray.opacity(0.1)]
+                                        : [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 ),
-                            lineWidth: colorScheme == .dark ? 1 : 0.5
+                            lineWidth: isHovered ? (colorScheme == .dark ? 1.5 : 1) : (colorScheme == .dark ? 1 : 0.5)
                         )
+                        .animation(.easeInOut(duration: 0.25), value: isHovered)
                 )
         )
         .scaleEffect(isHovered ? 1.01 : 1.0)

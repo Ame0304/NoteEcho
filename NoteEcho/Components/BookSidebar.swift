@@ -99,7 +99,7 @@ private struct BookListItem: View {
             HStack(spacing: 8) {
                 Text(title)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(isSelected ? theme.themeColor :Color.primary)
+                    .foregroundStyle(isSelected ? Color.white :Color.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
@@ -122,9 +122,9 @@ private struct BookListItem: View {
     
     private var itemBackgroundColor: Color {
         if isSelected {
-            return theme.themeColor.opacity(0.10)
+            return theme.themeColor.opacity(0.8)
         } else if isHovered {
-            return theme.themeColor.opacity(0.05)
+            return theme.themeColor.opacity(0.15)
         } else {
             return Color.clear
         }
