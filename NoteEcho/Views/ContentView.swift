@@ -16,6 +16,20 @@ struct ContentView: View {
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
     
+    // Computed property that filters books to only show those with highlights
+    private var booksWithHighlights: [Book] {
+        let filteredBooks = books.filter { !$0.highlights.isEmpty }
+        
+        // If currently selected book has no highlights, deselect it
+        if let selectedBook = selectedBook, !filteredBooks.contains(where: { $0.id == selectedBook.id }) {
+            DispatchQueue.main.async {
+                self.selectedBook = nil
+            }
+        }
+        
+        return filteredBooks
+    }
+    
     // Computed property that filters and sorts highlights based on current UI state
     // This automatically recalculates whenever any of the state variables change
     private var filteredHighlights: [Highlight] {
@@ -52,7 +66,7 @@ struct ContentView: View {
                     // MARK: - Book Sidebar
                     BookSidebar(
                         selectedBook: $selectedBook,
-                        books: books
+                        books: booksWithHighlights
                     )
                     
                     // MARK: - Main Content Area
