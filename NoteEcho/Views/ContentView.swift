@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var sortByNewest = true     // Sort direction: true = newest first, false = oldest first
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
+    @State private var isRefreshing = false
     
     // Computed property that filters books to only show those with highlights
     private var booksWithHighlights: [Book] {
@@ -55,6 +56,19 @@ struct ContentView: View {
             sortByNewest ? $0.createdDate > $1.createdDate : $0.createdDate < $1.createdDate
         }
     }
+    
+    // MARK: - Refresh Data
+    private func refreshData() {
+        isRefreshing = true
+        
+        Task.detached { [modelContext] in
+            AppleBooksDataService.populateWithAppleBooksData(modelContext: modelContext)
+            
+            await MainActor.run {
+                isRefreshing = false
+            }
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -79,6 +93,20 @@ struct ContentView: View {
                     )
                 }
                 .navigationTitle("NoteEcho")
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button(action: refreshData) {
+                            if isRefreshing {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                        }
+                        .disabled(isRefreshing)
+                        .pointingHandCursor()
+                    }
+                }
                 .onAppear {
                     // Populate with Apple Books data when the view first appears
                     AppleBooksDataService.populateWithAppleBooksData(modelContext: modelContext)

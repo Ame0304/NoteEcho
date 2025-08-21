@@ -69,6 +69,7 @@ struct DailyEchoCard: View {
                         .onHover { hovering in
                             isRegenerateButtonHovered = hovering
                         }
+                        .pointingHandCursor()
                     }
                 }
                 .padding(.horizontal, 20)

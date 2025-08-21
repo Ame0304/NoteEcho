@@ -5,6 +5,7 @@ import SQLite3
 class AppleBooksDataService {
     
     // MARK: - Database Paths
+    
     private static let annotationBasePath = NSHomeDirectory() + "/Library/Containers/com.apple.iBooksX/Data/Documents/AEAnnotation"
     private static let libraryBasePath = NSHomeDirectory() + "/Library/Containers/com.apple.iBooksX/Data/Documents/BKLibrary"
     

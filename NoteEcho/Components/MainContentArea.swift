@@ -58,6 +58,7 @@ struct MainContentArea: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .pointingHandCursor()
             }
             .padding(.horizontal)
             .padding(.top, 16)

@@ -118,6 +118,7 @@ private struct BookListItem: View {
         .onHover { hovering in
             isHovered = hovering
         }
+        .pointingHandCursor()
     }
     
     private var itemBackgroundColor: Color {
