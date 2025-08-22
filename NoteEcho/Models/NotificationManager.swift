@@ -42,8 +42,17 @@ class NotificationManager: ObservableObject {
         }
     }
     
-    /// Schedules daily notifications with highlights
+    /// Schedules daily notifications with highlights (using default 9 AM time)
     func scheduleDailyNotifications(with highlights: [Highlight]) async {
+        var dateComponents = DateComponents()
+        dateComponents.hour = Self.defaultNotificationHour
+        dateComponents.minute = Self.defaultNotificationMinute
+        
+        await scheduleDailyNotifications(with: highlights, at: dateComponents)
+    }
+    
+    /// Schedules daily notifications with highlights at custom time
+    func scheduleDailyNotifications(with highlights: [Highlight], at dateComponents: DateComponents) async {
         // Check if we have permission
         guard isAuthorized else {
             print("NotificationManager: No permission to schedule notifications")
@@ -60,7 +69,7 @@ class NotificationManager: ObservableObject {
         }
         
         // Schedule notification for daily delivery
-        await scheduleNotification(with: highlights)
+        await scheduleNotification(with: highlights, at: dateComponents)
     }
     
     /// Cancels all scheduled notifications
@@ -85,8 +94,17 @@ class NotificationManager: ObservableObject {
         print("NotificationManager: Authorization status - \(authorizationStatus.rawValue)")
     }
     
-    /// Schedules a daily repeating notification
+    /// Schedules a daily repeating notification (default time)
     private func scheduleNotification(with highlights: [Highlight]) async {
+        var dateComponents = DateComponents()
+        dateComponents.hour = Self.defaultNotificationHour
+        dateComponents.minute = Self.defaultNotificationMinute
+        
+        await scheduleNotification(with: highlights, at: dateComponents)
+    }
+    
+    /// Schedules a daily repeating notification at custom time
+    private func scheduleNotification(with highlights: [Highlight], at dateComponents: DateComponents) async {
         // Create notification content using daily highlight
         guard let dailyHighlight = highlights.dailyRandomHighlight else {
             print("NotificationManager: No daily highlight available")
@@ -94,11 +112,6 @@ class NotificationManager: ObservableObject {
         }
         
         let content = createNotificationContent(for: dailyHighlight)
-        
-        // Create daily trigger for 9:00 AM
-        var dateComponents = DateComponents()
-        dateComponents.hour = Self.defaultNotificationHour
-        dateComponents.minute = Self.defaultNotificationMinute
         
         let trigger = UNCalendarNotificationTrigger(
             dateMatching: dateComponents,
@@ -115,7 +128,9 @@ class NotificationManager: ObservableObject {
         // Schedule the notification
         do {
             try await notificationCenter.add(request)
-            print("NotificationManager: Successfully scheduled daily notification for \(Self.defaultNotificationHour):00")
+            let hour = dateComponents.hour ?? 0
+            let minute = dateComponents.minute ?? 0
+            print("NotificationManager: Successfully scheduled daily notification for \(hour):\(String(format: "%02d", minute))")
         } catch {
             print("NotificationManager: Error scheduling notification: \(error)")
         }

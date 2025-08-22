@@ -97,26 +97,7 @@ struct ContentView: View {
                 }
                 .navigationTitle("NoteEcho")
                 .toolbar {
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        // Debug notification button (temporary for testing)
-                        Button("Test Notification") {
-                            Task {
-                                if !notificationManager.isAuthorized {
-                                    let granted = await notificationManager.requestNotificationPermission()
-                                    print("Notification permission granted: \(granted)")
-                                }
-                                
-                                if notificationManager.isAuthorized {
-                                    await notificationManager.scheduleDailyNotifications(with: allHighlights)
-                                    print("Debug: Scheduled daily notifications with \(allHighlights.count) highlights")
-                                } else {
-                                    print("Debug: No notification permission")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .pointingHandCursor()
-                        
+                    ToolbarItem(placement: .primaryAction) {
                         Button(action: refreshData) {
                             if isRefreshing {
                                 ProgressView()

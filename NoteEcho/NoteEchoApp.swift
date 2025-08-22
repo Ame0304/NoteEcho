@@ -12,11 +12,13 @@ import SwiftData
 struct NoteEchoApp: App {
     // Notification manager for daily highlight notifications
     @StateObject private var notificationManager = NotificationManager()
+    @Environment(\.openWindow) private var openWindow
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Book.self,
-            Highlight.self
+            Highlight.self,
+            NotificationSettings.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -38,6 +40,24 @@ struct NoteEchoApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings...") {
+                    openWindow(id: "settings")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+        }
+        
+        // Settings window
+        Window("Settings", id: "settings") {
+            SettingsView()
+                .environmentObject(notificationManager)
+        }
+        .modelContainer(sharedModelContainer)
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
     }
     
     // MARK: - Notification Setup
