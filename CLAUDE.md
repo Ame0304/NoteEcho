@@ -79,7 +79,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **MainContentArea**: Contains Daily Echo section, search/sort controls, and highlights display area
 - **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling, unified card design, and regenerate button with smooth rotation animations
 - **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
-- **SettingsView**: Dedicated settings window for notification preferences with time picker and permission management
+- **SettingsView**: Dedicated settings window with streamlined notification preferences, manual save system, and integrated permission handling
 - **NotificationManager**: Handles daily highlight notifications using UserNotifications framework with customizable scheduling
 - **AppleBooksDataService**: Imports real highlights from Apple Books SQLite databases with fallback error handling
 
@@ -141,6 +141,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Color Accessibility**: All colors tested for contrast in both light and dark modes
 - **Interactive States**: Consistent hover, selection, and focus feedback across all interactive elements
 - **Hover Effects**: HighlightCard displays green theme color border on hover with smooth .easeInOut animations, maintaining visual consistency with DailyEchoCard styling
+- **Settings UI Pattern**: Manual save approach with smart change detection eliminates auto-save conflicts and provides clear user control over when to commit notification time changes
 
 ### Testing Approach
 - **Unit Tests**: Swift Testing framework in NoteEchoTests/
@@ -169,10 +170,10 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 
 ### Notification System
 - **Framework**: UserNotifications for daily highlight reminders
-- **Scheduling**: Customizable time picker with persistent settings storage
+- **Scheduling**: Manual save time picker with smart change detection to prevent auto-save conflicts
 - **Content**: Dynamic notification content using daily random highlight selection
-- **Permissions**: Automatic permission handling with graceful fallbacks
-- **Settings**: Dedicated Settings window accessible via menu bar (⌘,)
+- **Permissions**: Streamlined permission handling integrated into main notification toggle
+- **Settings**: Dedicated Settings window accessible via menu bar (⌘,) with user-controlled save workflow
 
 ### Typography System
 - **Font**: SF Pro Rounded for friendly, modern appearance
