@@ -10,17 +10,18 @@
 ## Phase 1: Production Foundation (Priority: High)
 **Goal: Make app distributable to other users**
 
-### 1. Re-enable Sandboxing with User Permission
-- Re-enable `com.apple.security.app-sandbox` in entitlements
-- Implement NSOpenPanel for user to select Apple Books folder
-- Add security-scoped bookmarks for persistent access
-- Create user onboarding flow explaining permissions needed
+### 1. Finalize Apple Books Access Solution
+- Keep current entitlement approach with `com.apple.security.temporary-exception.files.home-relative-path.read-only`
+- Document that this prevents App Store distribution (acceptable trade-off)
+- Create user onboarding flow explaining why the app needs special permissions
+- Add error handling for cases where Apple Books data is unavailable
 
-### 2. Code Signing & Distribution Setup
-- Configure Developer ID code signing
+### 2. Direct Distribution Setup (Outside App Store)
+- Configure Developer ID code signing for direct distribution
 - Set up notarization for macOS Gatekeeper compatibility
 - Create DMG installer with proper app packaging
-- Test on clean macOS systems without development environment
+- Set up distribution website or GitHub releases for downloads
+- Test installation and security warnings on clean macOS systems
 
 ### 3. Bug Fix: Books Without Highlights
 - Filter books that have zero highlights in BookSidebar
@@ -79,17 +80,43 @@
 - Add comprehensive unit test coverage
 - Memory optimization for large datasets
 
+## Distribution Strategy
+
+### Why Direct Distribution (Outside App Store)
+**Trade-offs Accepted:**
+- ✅ **Functionality**: Full access to Apple Books highlights via temporary exception entitlement
+- ✅ **User Experience**: No complex permission flows or file selection
+- ❌ **App Store Discovery**: No App Store searchability or automatic updates
+- ❌ **User Trust**: Some users prefer App Store-vetted apps
+
+**Distribution Approach:**
+- GitHub Releases for versioned downloads
+- Direct website downloads with clear installation instructions
+- Developer ID code signing to minimize security warnings
+- Notarization for Gatekeeper compatibility
+- Clear documentation about why special permissions are needed
+
+**Update Strategy:**
+- Manual update notifications within app
+- Direct download links to latest version
+- Consider Sparkle framework for future auto-updates
+
+### Target Audience
+- Power users comfortable with direct app downloads
+- Apple Books heavy users who want better highlight management
+- Users willing to trade App Store convenience for specialized functionality
+
 ## Technical Implementation Details
 
-### Sandboxing Solution Architecture
+### Apple Books Access Architecture
 ```swift
-// Use NSOpenPanel to let user select Apple Books container folder
-// Store security-scoped bookmark data in UserDefaults
-// Implement permission validation on app launch
-class PermissionManager {
-    func requestAppleBooksAccess() -> URL?
-    func validateStoredPermissions() -> Bool
-    func storeSecurityScopedBookmark(for url: URL)
+// Direct file access using temporary exception entitlement
+// No user permission dialogs needed - works automatically
+// Graceful fallback when Apple Books data unavailable
+class AppleBooksDataService {
+    func loadHighlights() -> [Highlight]
+    func validateAppleBooksAccess() -> Bool
+    func handleMissingDataGracefully()
 }
 ```
 
@@ -146,17 +173,23 @@ class NotificationManager {
 
 **Total: 9-13 weeks for complete roadmap**
 
-## Risk Assessment
+## Risk Assessment & Trade-offs
+
+### Accepted Trade-offs
+- **No App Store Distribution**: Prevents App Store discovery but enables full Apple Books access
+- **Manual Updates**: Users must download updates manually (can be improved with auto-updater later)
+- **Reduced Initial Trust**: Some users prefer App Store-vetted apps
 
 ### High Risk Items
 - Apple Books database format changes in future macOS versions
-- Sandboxing limitations preventing reliable database access
+- macOS security changes affecting temporary exception entitlements
 - iCloud sync behavior not accessible to third-party apps
 
 ### Medium Risk Items
-- Code signing and notarization complexity
+- Code signing and notarization complexity for direct distribution
 - UserNotifications permission handling
 - Performance with very large highlight collections
+- User adoption without App Store marketing
 
 ### Low Risk Items
 - UI/UX improvements and polish
