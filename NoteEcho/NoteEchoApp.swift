@@ -10,6 +10,9 @@ import SwiftData
 
 @main
 struct NoteEchoApp: App {
+    // Notification manager for daily highlight notifications
+    @StateObject private var notificationManager = NotificationManager()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Book.self,
@@ -27,7 +30,51 @@ struct NoteEchoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(notificationManager)
+                .onAppear {
+                    Task {
+                        await setupNotifications()
+                    }
+                }
         }
         .modelContainer(sharedModelContainer)
+    }
+    
+    // MARK: - Notification Setup
+    
+    /// Sets up notifications when the app launches
+    @MainActor
+    private func setupNotifications() async {
+        // Check current authorization status
+        await notificationManager.checkAuthorizationStatus()
+        
+        // Request permission if not determined
+        if notificationManager.authorizationStatus == .notDetermined {
+            let granted = await notificationManager.requestNotificationPermission()
+            print("Notification permission granted: \(granted)")
+        }
+        
+        // Schedule notifications if authorized
+        if notificationManager.isAuthorized {
+            await scheduleNotificationsWithHighlights()
+        }
+    }
+    
+    /// Loads highlights from SwiftData and schedules notifications
+    @MainActor
+    private func scheduleNotificationsWithHighlights() async {
+        // Create a context to fetch highlights
+        let context = sharedModelContainer.mainContext
+        let descriptor = FetchDescriptor<Highlight>(
+            sortBy: [SortDescriptor(\.createdDate, order: .reverse)]
+        )
+        
+        do {
+            let highlights = try context.fetch(descriptor)
+            await notificationManager.scheduleDailyNotifications(with: highlights)
+            print("Scheduled daily notifications with \(highlights.count) highlights")
+        } catch {
+            print("Error fetching highlights for notifications: \(error)")
+        }
     }
 }

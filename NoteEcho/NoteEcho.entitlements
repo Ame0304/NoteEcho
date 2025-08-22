@@ -13,5 +13,7 @@
     <array>
         <string>Library/Containers/com.apple.iBooksX/</string>
     </array>
+    <key>com.apple.security.personal-information.notifications</key>
+    <true/>
 </dict>
 </plist>

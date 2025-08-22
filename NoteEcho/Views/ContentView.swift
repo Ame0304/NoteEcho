@@ -6,6 +6,9 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     
+    // Notification manager
+    @EnvironmentObject private var notificationManager: NotificationManager
+    
     // SwiftData queries
     @Query private var books: [Book]
     @Query private var allHighlights: [Highlight]
@@ -94,7 +97,26 @@ struct ContentView: View {
                 }
                 .navigationTitle("NoteEcho")
                 .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        // Debug notification button (temporary for testing)
+                        Button("Test Notification") {
+                            Task {
+                                if !notificationManager.isAuthorized {
+                                    let granted = await notificationManager.requestNotificationPermission()
+                                    print("Notification permission granted: \(granted)")
+                                }
+                                
+                                if notificationManager.isAuthorized {
+                                    await notificationManager.scheduleDailyNotifications(with: allHighlights)
+                                    print("Debug: Scheduled daily notifications with \(allHighlights.count) highlights")
+                                } else {
+                                    print("Debug: No notification permission")
+                                }
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .pointingHandCursor()
+                        
                         Button(action: refreshData) {
                             if isRefreshing {
                                 ProgressView()
