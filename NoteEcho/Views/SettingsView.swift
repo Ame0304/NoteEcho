@@ -2,6 +2,13 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 
+enum SaveButtonState {
+    case hidden
+    case normal
+    case saving
+    case success
+}
+
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
@@ -13,6 +20,7 @@ struct SettingsView: View {
     // Local state for the time picker
     @State private var selectedTime = Date()
     @State private var isUpdating = false
+    @State private var saveButtonState: SaveButtonState = .hidden
     
     // Computed property to get current settings or create default
     private var settings: NotificationSettings {
@@ -52,45 +60,68 @@ struct SettingsView: View {
             
             // Settings Form
             VStack(spacing: 20) {
-                // Enable/Disable Toggle
+                // Enable/Disable Toggle with Permission Handling
                 settingRow(
                     icon: "bell.fill",
                     title: "Daily Notifications",
-                    subtitle: settings.isEnabled ? "Receive daily highlight reminders" : "Notifications are disabled"
+                    subtitle: notificationSubtitle()
                 ) {
-                    Toggle("", isOn: Binding(
-                        get: { settings.isEnabled },
-                        set: { _ in
-                            settings.toggleEnabled()
-                            saveSettings()
-                        }
-                    ))
-                    .toggleStyle(SwitchToggleStyle(tint: theme.themeColor))
-                }
-                
-                // Time Picker (only shown when enabled)
-                if settings.isEnabled {
-                    settingRow(
-                        icon: "clock.fill",
-                        title: "Notification Time",
-                        subtitle: "Daily reminder at \(settings.formattedTime)"
-                    ) {
-                        DatePicker(
-                            "",
-                            selection: $selectedTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                        .datePickerStyle(.compact)
-                        .onChange(of: selectedTime) { _, newTime in
-                            updateNotificationTime(newTime)
+                    HStack(spacing: 12) {
+                        if notificationManager.authorizationStatus != .authorized {
+                            Button("Grant Permission") {
+                                Task {
+                                    await notificationManager.requestNotificationPermission()
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        } else {
+                            Toggle("", isOn: Binding(
+                                get: { settings.isEnabled },
+                                set: { _ in
+                                    settings.toggleEnabled()
+                                    saveSettings()
+                                }
+                            ))
+                            .toggleStyle(SwitchToggleStyle(tint: theme.themeColor))
                         }
                     }
                 }
                 
-                // Authorization Status Info
-                authorizationStatusRow()
+                // Time Picker (only shown when enabled and authorized)
+                if settings.isEnabled && notificationManager.authorizationStatus == .authorized {
+                    settingRow(
+                        icon: "clock.fill",
+                        title: "Notification Time",
+                        subtitle: timePickerSubtitle()
+                    ) {
+                        HStack(spacing: 12) {
+                            DatePicker(
+                                "",
+                                selection: $selectedTime,
+                                displayedComponents: .hourAndMinute
+                            )
+                            .datePickerStyle(.compact)
+                            .onChange(of: selectedTime) { _, _ in
+                                updateSaveButtonState()
+                            }
+                            
+                        }
+                    }
+                }
+                
             }
             .padding(.horizontal, 20)
+            
+            // Save Button (only shown when there are unsaved changes)
+            if saveButtonState != .hidden {
+                saveButton()
+                    .padding(.horizontal, 20)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            }
             
             Spacer()
             
@@ -113,6 +144,12 @@ struct SettingsView: View {
         .frame(maxWidth: 450, maxHeight: 500)
         .background(theme.cardBackgroundColor)
         .onAppear {
+            setupInitialTime()
+        }
+        .onChange(of: settings.notificationHour) { _, _ in
+            setupInitialTime()
+        }
+        .onChange(of: settings.notificationMinute) { _, _ in
             setupInitialTime()
         }
     }
@@ -156,48 +193,6 @@ struct SettingsView: View {
         )
     }
     
-    @ViewBuilder
-    private func authorizationStatusRow() -> some View {
-        let status = notificationManager.authorizationStatus
-        let (icon, title, subtitle, color) = authorizationInfo(for: status)
-        
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(color)
-                .frame(width: 24, height: 24)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .appFont(AppTypography.bodyBold)
-                    .foregroundColor(.primary)
-                
-                Text(subtitle)
-                    .appFont(AppTypography.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            if status != .authorized {
-                Button("Grant Permission") {
-                    Task {
-                        await notificationManager.requestNotificationPermission()
-                    }
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(colorScheme == .dark ? Color.gray.opacity(0.1) : Color.gray.opacity(0.05))
-        )
-    }
     
     // MARK: - Helper Methods
     
@@ -218,10 +213,21 @@ struct SettingsView: View {
         settings.updateTime(from: newTime)
         saveSettings()
         
+        // Show success feedback
+        withAnimation(.easeInOut(duration: 0.3)) {
+            saveButtonState = .success
+        }
+        
         // Reschedule notifications with new time
         Task {
             await rescheduleNotifications()
             isUpdating = false
+            
+            // Hide save button after delay
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+            withAnimation(.easeOut(duration: 0.2)) {
+                saveButtonState = .hidden
+            }
         }
     }
     
@@ -247,22 +253,6 @@ struct SettingsView: View {
         }
     }
     
-    private func authorizationInfo(for status: UNAuthorizationStatus) -> (String, String, String, Color) {
-        switch status {
-        case .notDetermined:
-            return ("questionmark.circle", "Permission Required", "Tap to allow notifications", .orange)
-        case .denied:
-            return ("xmark.circle", "Permission Denied", "Enable in System Preferences", .red)
-        case .authorized:
-            return ("checkmark.circle", "Permission Granted", "Notifications are enabled", .green)
-        case .provisional:
-            return ("clock.circle", "Provisional Access", "Limited notification access", .blue)
-        case .ephemeral:
-            return ("timer.circle", "Temporary Access", "Temporary notification access", .blue)
-        @unknown default:
-            return ("circle", "Unknown Status", "Check system settings", .gray)
-        }
-    }
     
     private func nextNotificationText() -> String {
         guard let nextDate = settings.todaysNotificationDate() else {
@@ -270,7 +260,6 @@ struct SettingsView: View {
         }
         
         let now = Date()
-        let calendar = Calendar.current
         
         if nextDate > now {
             // Today's notification hasn't happened yet
@@ -281,6 +270,88 @@ struct SettingsView: View {
             // Today's notification has passed, next is tomorrow
             return "Tomorrow at \(settings.formattedTime)"
         }
+    }
+    
+    private func notificationSubtitle() -> String {
+        let status = notificationManager.authorizationStatus
+        
+        switch status {
+        case .notDetermined:
+            return "Tap 'Grant Permission' to enable notifications"
+        case .denied:
+            return "Permission denied - Enable in System Preferences"
+        case .authorized:
+            return settings.isEnabled ? "Receive daily highlight reminders" : "Notifications are disabled"
+        case .provisional:
+            return "Limited notification access"
+        case .ephemeral:
+            return "Temporary notification access"
+        @unknown default:
+            return "Check notification settings"
+        }
+    }
+    
+    private func timePickerSubtitle() -> String {
+        if saveButtonState == .success {
+            return "Updated to \(settings.formattedTime)"
+        } else if hasUnsavedChanges {
+            return "Daily reminder at \(settings.formattedTime) (unsaved changes)"
+        } else {
+            return "Daily reminder at \(settings.formattedTime)"
+        }
+    }
+    
+    private var hasUnsavedChanges: Bool {
+        guard let currentNotificationTime = settings.todaysNotificationDate() else { return false }
+        let calendar = Calendar.current
+        let selectedComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        let currentComponents = calendar.dateComponents([.hour, .minute], from: currentNotificationTime)
+        
+        return selectedComponents.hour != currentComponents.hour || selectedComponents.minute != currentComponents.minute
+    }
+    
+    private func updateSaveButtonState() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if hasUnsavedChanges && saveButtonState != .saving && saveButtonState != .success {
+                saveButtonState = .normal
+            } else if !hasUnsavedChanges && saveButtonState == .normal {
+                saveButtonState = .hidden
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func saveButton() -> some View {
+        Button(action: {
+            saveButtonState = .saving
+            updateNotificationTime(selectedTime)
+        }) {
+            HStack(spacing: 8) {
+                switch saveButtonState {
+                case .normal:
+                    Image(systemName: "checkmark.circle")
+                    Text("Save Changes")
+                case .saving:
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Saving...")
+                case .success:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                    Text("Saved!")
+                        .foregroundColor(.green)
+                case .hidden:
+                    EmptyView()
+                }
+            }
+            .appFont(AppTypography.bodyBold)
+            .foregroundColor(saveButtonState == .success ? .green : .white)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .tint(saveButtonState == .success ? .green : theme.themeColor)
+        .disabled(saveButtonState == .saving || saveButtonState == .success)
+        .frame(maxWidth: .infinity)
     }
 }
 

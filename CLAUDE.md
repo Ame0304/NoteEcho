@@ -48,24 +48,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Data Layer - SwiftData Models
 - **Book**: Represents a book with title, author, and assetId
 - **Highlight**: Represents a highlighted passage with content, optional note, chapter, and creation date
+- **NotificationSettings**: Stores user preferences for daily highlight notifications (time, enabled state)
 - **Relationship**: One-to-many (Book → Highlights) with cascade delete
 - **Storage**: SwiftData with ModelContainer configured in NoteEchoApp.swift
 - **Data Source**: Real Apple Books highlights imported from SQLite databases
 
 ### View Hierarchy
 ```
-NoteEchoApp (App entry point with ModelContainer)
-└── ContentView (Main interface with HSplitView)
-    ├── BookSidebar (Fixed 200px width)
-    │   ├── "Books" header
-    │   ├── "All Books" option
-    │   └── Scrollable book list with selection states
-    └── MainContentArea (Flexible width)
-        ├── Daily Echo section (DailyEchoCard with random daily highlight)
-        ├── Search and sort controls row: SearchBar + SortButton
-        └── Highlights display
-            ├── Empty state (when no highlights match filters)
-            └── ScrollView with LazyVStack of HighlightCard components
+NoteEchoApp (App entry point with ModelContainer + NotificationManager)
+├── ContentView (Main interface with HSplitView)
+│   ├── BookSidebar (Fixed 200px width)
+│   │   ├── "Books" header
+│   │   ├── "All Books" option
+│   │   └── Scrollable book list with selection states
+│   └── MainContentArea (Flexible width)
+│       ├── Daily Echo section (DailyEchoCard with random daily highlight)
+│       ├── Search and sort controls row: SearchBar + SortButton
+│       └── Highlights display
+│           ├── Empty state (when no highlights match filters)
+│           └── ScrollView with LazyVStack of HighlightCard components
+└── SettingsView (Separate Settings window)
+    ├── Notification toggle and time picker
+    ├── Permission status display
+    └── Next notification information
 ```
 
 ### Key Components
@@ -74,6 +79,8 @@ NoteEchoApp (App entry point with ModelContainer)
 - **MainContentArea**: Contains Daily Echo section, search/sort controls, and highlights display area
 - **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling, unified card design, and regenerate button with smooth rotation animations
 - **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
+- **SettingsView**: Dedicated settings window for notification preferences with time picker and permission management
+- **NotificationManager**: Handles daily highlight notifications using UserNotifications framework with customizable scheduling
 - **AppleBooksDataService**: Imports real highlights from Apple Books SQLite databases with fallback error handling
 
 ### UI Design System
@@ -90,6 +97,8 @@ NoteEchoApp (App entry point with ModelContainer)
 - **SwiftData Integration**: `@Query` automatically fetches and updates imported data in ContentView
 - **Filtering**: `filteredHighlights` computed property handles search + book filtering + date sorting
 - **Daily Echo**: `allHighlights` passed to MainContentArea for Daily Echo random selection
+- **Notifications**: NotificationManager schedules daily highlights using user preferences from NotificationSettings
+- **Settings Management**: NotificationSettings persisted in SwiftData with automatic UI updates
 - **State Management**: Variables (`selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
 - **Component Communication**: BookSidebar receives book selection state and updates it via binding
 - **Random Selection**: Daily Echo uses date-based seeding to show consistent random highlight with manual regenerate
@@ -107,6 +116,9 @@ NoteEchoApp (App entry point with ModelContainer)
 - **SwiftData Relationships**: Bidirectional with `@Relationship(inverse:)` 
 - **SQLite Integration**: Direct access to Apple Books databases with SQLite3 framework
 - **Data Service Pattern**: AppleBooksDataService handles database access, data transformation, and error handling
+- **Notification System**: UserNotifications framework with customizable daily scheduling and permission handling
+- **Settings Persistence**: NotificationSettings SwiftData model with automatic UI synchronization
+- **Window Management**: Multiple SwiftUI windows (main app + settings) with proper environment object sharing
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
 - **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
@@ -137,10 +149,10 @@ NoteEchoApp (App entry point with ModelContainer)
 
 ## File Structure
 - **NoteEcho/**: Main app source code
-  - **Views/**: Core view components (ContentView, HighlightCard, DailyEchoCard)
+  - **Views/**: Core view components (ContentView, HighlightCard, DailyEchoCard, SettingsView)
   - **Components/**: Reusable UI components (BookSidebar, MainContentArea, SearchBar)
   - **Extensions/**: Swift extensions (Array+DailySelection for daily random logic)
-  - **Models/**: SwiftData models (Book, Highlight) and AppleBooksDataService for real data import
+  - **Models/**: SwiftData models (Book, Highlight, NotificationSettings), NotificationManager, and AppleBooksDataService
   - **Theme/**: Design system (AppTheme, AppTypography, Colors, BlurredGradientBackground)
 - **NoteEchoTests/**: Unit tests using Swift Testing
 - **NoteEchoUITests/**: UI tests using XCTest
@@ -154,6 +166,13 @@ NoteEchoApp (App entry point with ModelContainer)
 - **Sandboxing**: Currently disabled for development; plan to re-enable with NSOpenPanel for user permission
 - **Data Mapping**: Apple Books fields mapped to NoteEcho models with proper date conversion
 - **Error Handling**: Graceful fallback when Apple Books database unavailable
+
+### Notification System
+- **Framework**: UserNotifications for daily highlight reminders
+- **Scheduling**: Customizable time picker with persistent settings storage
+- **Content**: Dynamic notification content using daily random highlight selection
+- **Permissions**: Automatic permission handling with graceful fallbacks
+- **Settings**: Dedicated Settings window accessible via menu bar (⌘,)
 
 ### Typography System
 - **Font**: SF Pro Rounded for friendly, modern appearance
