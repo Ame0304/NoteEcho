@@ -54,7 +54,14 @@ struct ContentView: View {
             }
         }
         
-        // Step 3: Sort by creation date
+        // Step 3: Filter out highlights with fewer than 3 words/characters
+        highlights = highlights.filter { highlight in
+            let wordCount = highlight.content.split(separator: " ").count
+            let charCount = highlight.content.trimmingCharacters(in: .whitespacesAndNewlines).count
+            return wordCount >= 3 || charCount >= 6  // 3+ words OR 6+ characters for Chinese
+        }
+        
+        // Step 4: Sort by creation date
         return highlights.sorted { 
             sortByNewest ? $0.createdDate > $1.createdDate : $0.createdDate < $1.createdDate
         }
