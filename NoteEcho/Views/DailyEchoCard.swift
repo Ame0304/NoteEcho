@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 
 struct DailyEchoCard: View {
     let highlight: Highlight?

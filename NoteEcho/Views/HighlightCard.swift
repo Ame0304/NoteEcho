@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 
 struct HighlightCard: View {
     let highlight: Highlight

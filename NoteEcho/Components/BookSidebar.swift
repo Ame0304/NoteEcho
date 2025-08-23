@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 
 // MARK: - Book Sidebar Component
 struct BookSidebar: View {
@@ -49,39 +48,7 @@ struct BookSidebar: View {
             }
         }
         .frame(width: 200)
-        .background(
-            RoundedRectangle(cornerRadius: AppTheme.UIConstants.controlCornerRadius)
-                .fill(theme.cardBackgroundColor)
-                .shadow(
-                    color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.05),
-                    radius: AppTheme.UIConstants.shadowRadius,
-                    x: AppTheme.UIConstants.shadowOffset.width,
-                    y: AppTheme.UIConstants.shadowOffset.height
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppTheme.UIConstants.controlCornerRadius)
-                        .stroke(
-                            sidebarBorderGradient,
-                            lineWidth: colorScheme == .dark ? AppTheme.UIConstants.darkModeLineWidth : AppTheme.UIConstants.normalLineWidth
-                        )
-                )
-        )
-    }
-    
-    private var sidebarBorderGradient: LinearGradient {
-        if colorScheme == .dark {
-            return LinearGradient(
-                colors: [theme.themeColor.opacity(0.2), theme.themeColor.opacity(0.1), Color.clear],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
+        .controlBackground(theme: theme, colorScheme: colorScheme)
     }
 }
 

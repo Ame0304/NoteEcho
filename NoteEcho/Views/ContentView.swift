@@ -9,9 +9,9 @@ struct ContentView: View {
     // Notification manager
     @EnvironmentObject private var notificationManager: NotificationManager
     
-    // SwiftData queries
-    @Query private var books: [Book]
-    @Query private var allHighlights: [Highlight]
+    // SwiftData queries - optimized with sorting at database level
+    @Query(sort: \Book.title, order: .forward) private var books: [Book]
+    @Query(sort: \Highlight.createdDate, order: .reverse) private var allHighlights: [Highlight]
     
     // State variables - these hold the current UI state and trigger view updates when changed
     @State private var selectedBook: Book?     // Currently selected book for filtering (nil = all books)
@@ -22,7 +22,7 @@ struct ContentView: View {
     
     // Computed property that filters books to only show those with highlights
     private var booksWithHighlights: [Book] {
-        let filteredBooks = books.filter { !$0.highlights.isEmpty }
+        let filteredBooks = HighlightFilterService.booksWithHighlights(from: books)
         
         // If currently selected book has no highlights, deselect it
         if let selectedBook = selectedBook, !filteredBooks.contains(where: { $0.id == selectedBook.id }) {
@@ -37,34 +37,12 @@ struct ContentView: View {
     // Computed property that filters and sorts highlights based on current UI state
     // This automatically recalculates whenever any of the state variables change
     private var filteredHighlights: [Highlight] {
-        var highlights = allHighlights
-        
-        // Step 1: Filter by selected book (if any)
-        if let selectedBook = selectedBook {
-            // $0.book?.id - Gets the ID of the book that this highlight belongs to
-            highlights = highlights.filter { $0.book?.id == selectedBook.id }
-        }
-        
-        // Step 2: Filter by search text (searches in content, notes, and book titles)
-        if !searchText.isEmpty {
-            highlights = highlights.filter { highlight in
-                highlight.content.localizedCaseInsensitiveContains(searchText) ||
-                highlight.note?.localizedCaseInsensitiveContains(searchText) == true ||
-                highlight.book?.title.localizedCaseInsensitiveContains(searchText) == true
-            }
-        }
-        
-        // Step 3: Filter out highlights with fewer than 3 words/characters
-        highlights = highlights.filter { highlight in
-            let wordCount = highlight.content.split(separator: " ").count
-            let charCount = highlight.content.trimmingCharacters(in: .whitespacesAndNewlines).count
-            return wordCount >= 3 || charCount >= 6  // 3+ words OR 6+ characters for Chinese
-        }
-        
-        // Step 4: Sort by creation date
-        return highlights.sorted { 
-            sortByNewest ? $0.createdDate > $1.createdDate : $0.createdDate < $1.createdDate
-        }
+        return HighlightFilterService.filteredHighlights(
+            from: allHighlights,
+            selectedBook: selectedBook,
+            searchText: searchText,
+            sortByNewest: sortByNewest
+        )
     }
     
     // MARK: - Refresh Data

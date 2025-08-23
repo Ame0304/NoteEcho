@@ -53,9 +53,7 @@ struct MainContentArea: View {
                     }
                 } label: {
                     SortButtonLabel(sortByNewest: sortByNewest, theme: theme)
-                        .background(
-                            ControlBackground(theme: theme, colorScheme: colorScheme)
-                        )
+                        .controlBackground(theme: theme, colorScheme: colorScheme)
                 }
                 .buttonStyle(.plain)
                 .pointingHandCursor()
@@ -136,42 +134,3 @@ private struct SortButtonLabel: View {
     }
 }
 
-// MARK: - Shared Control Background (extracted from FilterControls)
-private struct ControlBackground: View {
-    let theme: AppTheme
-    let colorScheme: ColorScheme
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: AppTheme.UIConstants.controlCornerRadius)
-            .fill(theme.cardBackgroundColor)
-            .shadow(
-                color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.1),
-                radius: AppTheme.UIConstants.shadowRadius,
-                x: AppTheme.UIConstants.shadowOffset.width,
-                y: AppTheme.UIConstants.shadowOffset.height
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: AppTheme.UIConstants.controlCornerRadius)
-                    .stroke(
-                        controlBorderGradient,
-                        lineWidth: colorScheme == .dark ? AppTheme.UIConstants.darkModeLineWidth : AppTheme.UIConstants.normalLineWidth
-                    )
-            )
-    }
-    
-    private var controlBorderGradient: LinearGradient {
-        if colorScheme == .dark {
-            return LinearGradient(
-                colors: [theme.themeColor.opacity(0.3), theme.themeColor.opacity(0.1), Color.clear],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
-    }
-}

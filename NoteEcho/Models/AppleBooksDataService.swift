@@ -13,19 +13,7 @@ class AppleBooksDataService {
     static func populateWithAppleBooksData(modelContext: ModelContext) {
         // Clear any existing data (mock or old real data) to ensure fresh Apple Books data
         do {
-            let bookDescriptor = FetchDescriptor<Book>()
-            let existingBooks = try modelContext.fetch(bookDescriptor)
-            for book in existingBooks {
-                modelContext.delete(book)
-            }
-            
-            let highlightDescriptor = FetchDescriptor<Highlight>()
-            let existingHighlights = try modelContext.fetch(highlightDescriptor)
-            for highlight in existingHighlights {
-                modelContext.delete(highlight)
-            }
-            
-            try modelContext.save()
+            try clearExistingData(modelContext: modelContext)
             print("🗑️ Cleared existing data to load fresh Apple Books highlights")
         } catch {
             print("⚠️ Warning: Could not clear existing data: \(error)")
@@ -34,40 +22,74 @@ class AppleBooksDataService {
         // Try to load real Apple Books data
         do {
             let (books, highlights) = try loadAppleBooksData()
-            
-            // Insert books first
-            for book in books {
-                modelContext.insert(book)
-            }
-            
-            // Then create and insert highlights, linking them to books
-            for appleBooksHighlight in highlights {
-                if let book = books.first(where: { $0.assetId == appleBooksHighlight.assetId }) {
-                    let highlight = Highlight(
-                        id: appleBooksHighlight.id,
-                        content: appleBooksHighlight.content,
-                        note: appleBooksHighlight.note,
-                        chapter: appleBooksHighlight.chapter,
-                        createdDate: appleBooksHighlight.createdDate
-                    )
-                    highlight.book = book
-                    modelContext.insert(highlight)
-                }
-            }
-            
-            try modelContext.save()
+            try insertData(books: books, highlights: highlights, modelContext: modelContext)
             print("✅ Successfully loaded \(highlights.count) highlights from \(books.count) Apple Books")
-            
+        } catch let error as AppleBooksError {
+            handleAppleBooksError(error)
         } catch {
-            print("⚠️ Failed to load Apple Books data: \(error)")
-            print("📱 App will continue with empty state. Check Apple Books database access permissions.")
-            
-            // App continues with empty state - user can manually add highlights or check permissions
-            // Future enhancement: Could add inline minimal sample data here if needed
+            print("⚠️ Unexpected error loading Apple Books data: \(error)")
+            print("📱 App will continue with empty state.")
         }
     }
     
     // MARK: - Private Implementation
+    private static func clearExistingData(modelContext: ModelContext) throws {
+        let bookDescriptor = FetchDescriptor<Book>()
+        let existingBooks = try modelContext.fetch(bookDescriptor)
+        for book in existingBooks {
+            modelContext.delete(book)
+        }
+        
+        let highlightDescriptor = FetchDescriptor<Highlight>()
+        let existingHighlights = try modelContext.fetch(highlightDescriptor)
+        for highlight in existingHighlights {
+            modelContext.delete(highlight)
+        }
+        
+        try modelContext.save()
+    }
+    
+    private static func insertData(books: [Book], highlights: [AppleBooksHighlight], modelContext: ModelContext) throws {
+        // Create a lookup dictionary for better performance
+        var booksByAssetId: [String: Book] = [:]
+        
+        // Insert books first and build lookup
+        for book in books {
+            modelContext.insert(book)
+            booksByAssetId[book.assetId] = book
+        }
+        
+        // Insert highlights with efficient book lookup
+        for appleBooksHighlight in highlights {
+            if let book = booksByAssetId[appleBooksHighlight.assetId] {
+                let highlight = Highlight(
+                    id: appleBooksHighlight.id,
+                    content: appleBooksHighlight.content,
+                    note: appleBooksHighlight.note,
+                    chapter: appleBooksHighlight.chapter,
+                    createdDate: appleBooksHighlight.createdDate
+                )
+                highlight.book = book
+                modelContext.insert(highlight)
+            }
+        }
+        
+        try modelContext.save()
+    }
+    
+    private static func handleAppleBooksError(_ error: AppleBooksError) {
+        switch error {
+        case .annotationDirectoryNotFound, .libraryDirectoryNotFound:
+            print("⚠️ Apple Books directories not found. Please ensure Apple Books is installed and has been used.")
+        case .annotationDatabaseNotFound, .libraryDatabaseNotFound:
+            print("⚠️ Apple Books databases not found. Please try opening Apple Books and importing some books.")
+        case .databaseConnectionFailed:
+            print("⚠️ Could not connect to Apple Books database. Please check file permissions.")
+        case .queryPreparationFailed:
+            print("⚠️ Database query failed. Apple Books database structure may have changed.")
+        }
+        print("📱 App will continue with empty state. Consider checking Apple Books setup.")
+    }
     private static func loadAppleBooksData() throws -> ([Book], [AppleBooksHighlight]) {
         let books = try loadBooksFromAppleBooks()
         let highlights = try loadHighlightsFromAppleBooks()
