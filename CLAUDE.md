@@ -43,6 +43,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Run UI Tests**: Select NoteEchoUITests scheme and run, or use xcodebuild with appropriate destination
 - **Test Framework**: Uses both Swift Testing (for unit tests) and XCTest (for UI tests)
 
+### Distribution (Production Ready)
+- **Setup Distribution**: `./Scripts/setup-distribution.sh` (creates all necessary scripts)
+- **Build Release**: `./Scripts/build-release.sh` (creates optimized app for distribution)
+- **Create DMG**: `./Scripts/create-dmg.sh` (packages app into distributable DMG)
+- **Notarize** (Optional): `./Scripts/notarize.sh` (Apple notarization for enhanced security)
+- **Full Guide**: See [DISTRIBUTION.md](DISTRIBUTION.md) for complete instructions
+
 ## Architecture
 
 ### Data Layer - SwiftData Models
@@ -95,7 +102,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 ### Data Flow
 - **Data Import**: AppleBooksDataService loads real highlights from Apple Books SQLite databases on app launch
 - **SwiftData Integration**: `@Query` automatically fetches and updates imported data in ContentView
-- **Filtering**: `filteredHighlights` computed property handles search + book filtering + minimum word count filtering + date sorting
+- **Filtering**: HighlightFilterService provides optimized filtering with database-level sorting and proper separation of concerns
 - **Daily Echo**: `allHighlights` passed to MainContentArea for Daily Echo random selection
 - **Notifications**: NotificationManager schedules daily highlights using user preferences from NotificationSettings
 - **Settings Management**: NotificationSettings persisted in SwiftData with automatic UI updates
@@ -121,6 +128,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Window Management**: Multiple SwiftUI windows (main app + settings) with proper environment object sharing
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
 - **Content Filtering**: Minimum word count filtering excludes highlights with fewer than 3 words or 6 characters (supports both Western and Chinese text)
+- **Shared UI Components**: SharedControlStyles provides consistent styling across all controls with theme support
 - **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
 - **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension with regenerate override capability
