@@ -6,10 +6,10 @@ struct AppTypography {
     // MARK: - Font Sizes
     struct FontSize {
         static let largeTitle: CGFloat = 48
-        static let title: CGFloat = 32
+        static let title: CGFloat = 30
         static let headline: CGFloat = 16
         static let body: CGFloat = 14
-        static let caption: CGFloat = 12
+        static let caption: CGFloat = 10
     }
     
     // MARK: - Font Weights

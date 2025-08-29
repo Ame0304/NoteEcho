@@ -81,30 +81,42 @@ struct MainContentArea: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                // Content list - display different cards based on content type
+                // Content list - display different layouts based on content type
                 ScrollView {
-                    LazyVStack(spacing: selectedContentType == .words ? 8 : 20) {
-                        ForEach(filteredHighlights, id: \.id) { highlight in
-                            Group {
-                                if selectedContentType == .words {
-                                    WordCard(highlight: highlight)
-                                        .padding(.horizontal)
-                                } else {
-                                    HighlightCard(highlight: highlight)
-                                        .padding(.horizontal)
-                                }
+                    if selectedContentType == .words {
+                        // Grid layout for Words
+                        LazyVGrid(columns: [
+                            GridItem(.adaptive(minimum: 190), spacing: 16)
+                        ], spacing: 16) {
+                            ForEach(filteredHighlights, id: \.id) { highlight in
+                                WordCard(highlight: highlight)
+                                    .transition(.asymmetric(
+                                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                        removal: .scale(scale: 0.9).combined(with: .opacity)
+                                    ))
                             }
-                            .transition(.asymmetric(
-                                insertion: .scale(scale: 0.8).combined(with: .opacity),
-                                removal: .scale(scale: 0.9).combined(with: .opacity)
-                            ))
                         }
+                        .padding(.horizontal)
+                        .padding(.top, 16)
+                        .padding(.bottom, 20)
+                    } else {
+                        // List layout for Highlights
+                        LazyVStack(spacing: 20) {
+                            ForEach(filteredHighlights, id: \.id) { highlight in
+                                HighlightCard(highlight: highlight)
+                                    .padding(.horizontal)
+                                    .transition(.asymmetric(
+                                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                        removal: .scale(scale: 0.9).combined(with: .opacity)
+                                    ))
+                            }
+                        }
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
                     }
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: filteredHighlights)
-                    .animation(.easeInOut(duration: 0.3), value: selectedContentType)
-                    .padding(.top, 8)
-                    .padding(.bottom, 20)
                 }
+                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: filteredHighlights)
+                .animation(.easeInOut(duration: 0.3), value: selectedContentType)
             }
         }
     }

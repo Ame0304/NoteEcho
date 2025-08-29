@@ -29,7 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**NoteEcho** is a SwiftUI macOS application for managing and viewing book highlights. Users can search, filter by book, and sort highlights from their reading library.
+**NoteEcho** is a SwiftUI macOS application for managing and viewing book highlights. Users can explore their reading library through two distinct content categories: **Words** (short snippets under 4 words and 6 characters) and **Highlights** (longer passages), with dedicated search, filtering, and sorting capabilities for each type.
 
 ## Development Commands
 
@@ -56,24 +56,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Book**: Represents a book with title, author, and assetId
 - **Highlight**: Represents a highlighted passage with content, optional note, chapter, and creation date
 - **NotificationSettings**: Stores user preferences for daily highlight notifications (time, enabled state)
+- **ContentType**: Enum distinguishing between Words (.words) and Highlights (.highlights) content categories
 - **Relationship**: One-to-many (Book → Highlights) with cascade delete
 - **Storage**: SwiftData with ModelContainer configured in NoteEchoApp.swift
 - **Data Source**: Real Apple Books highlights imported from SQLite databases
+- **Categorization**: HighlightFilterService automatically categorizes content based on length (words <4 words AND <6 chars, highlights for everything else)
 
 ### View Hierarchy
 ```
 NoteEchoApp (App entry point with ModelContainer + NotificationManager)
-├── ContentView (Main interface with HSplitView)
-│   ├── BookSidebar (Fixed 200px width)
-│   │   ├── "Books" header
-│   │   ├── "All Books" option
-│   │   └── Scrollable book list with selection states
-│   └── MainContentArea (Flexible width)
-│       ├── Daily Echo section (DailyEchoCard with random daily highlight)
-│       ├── Search and sort controls row: SearchBar + SortButton
-│       └── Highlights display
-│           ├── Empty state (when no highlights match filters)
-│           └── ScrollView with LazyVStack of HighlightCard components
+├── ContentView (Main interface with HSplitView and dual content type support)
+│   ├── ContentSidebar (Fixed 200px width - dual section navigation)
+│   │   ├── Words Section
+│   │   │   └── "All Words" option with textformat icon
+│   │   └── Highlights Section  
+│   │       ├── "All Highlights" option with highlighter icon
+│   │       └── Book-based filtering (when Highlights selected)
+│   └── MainContentArea (Flexible width with content-aware display)
+│       ├── Daily Echo section (DailyEchoCard with random highlight from all content)
+│       ├── Search and sort controls row: SearchBar + SortButton (works across both content types)
+│       └── Content display (adapts based on selectedContentType)
+│           ├── WordCard components (compact design for short content)
+│           ├── HighlightCard components (full design for longer content)
+│           └── Content-aware empty states
 └── SettingsView (Separate Settings window)
     ├── Notification toggle and time picker
     ├── Permission status display
@@ -81,12 +86,14 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 ```
 
 ### Key Components
-- **ContentView**: Main coordinator with HSplitView layout and state management
-- **BookSidebar**: Dedicated sidebar for book selection with hover and selection states
-- **MainContentArea**: Contains Daily Echo section, search/sort controls, and highlights display area
-- **DailyEchoCard**: Featured component displaying a random daily highlight with enhanced styling, unified card design, and regenerate button with smooth rotation animations
-- **HighlightCard**: Reusable component for displaying individual highlights with book metadata and interactive animations
-- **SettingsView**: Dedicated settings window with streamlined notification preferences, manual save system, and integrated permission handling
+- **ContentView**: Main coordinator with HSplitView layout, dual content type state management, and centralized filtering
+- **ContentSidebar**: Dual-section navigation sidebar with Words/Highlights categorization and dynamic book filtering
+- **MainContentArea**: Content-aware display area with adaptive card rendering based on selected content type
+- **WordCard**: Compact component optimized for short content with horizontal layout and minimal padding
+- **HighlightCard**: Full-featured component for longer content with vertical layout and comprehensive metadata display
+- **DailyEchoCard**: Featured component displaying a random daily highlight from all content with enhanced styling and regenerate functionality
+- **SettingsView**: Dedicated settings window with streamlined notification preferences and manual save system
+- **HighlightFilterService**: Core filtering service with content categorization logic and type-aware filtering methods
 - **NotificationManager**: Handles daily highlight notifications using UserNotifications framework with customizable scheduling
 - **AppleBooksDataService**: Imports real highlights from Apple Books SQLite databases with fallback error handling
 
@@ -102,14 +109,16 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 ### Data Flow
 - **Data Import**: AppleBooksDataService loads real highlights from Apple Books SQLite databases on app launch
 - **SwiftData Integration**: `@Query` automatically fetches and updates imported data in ContentView
-- **Filtering**: HighlightFilterService provides optimized filtering with database-level sorting and proper separation of concerns
-- **Daily Echo**: `allHighlights` passed to MainContentArea for Daily Echo random selection
+- **Content Categorization**: HighlightFilterService automatically categorizes all content into Words (<4 words AND <6 chars) and Highlights (everything else) using `categorizeHighlights()`
+- **Type-Aware Filtering**: `filteredContent()` method applies book, search, and sort filters based on selected content type
+- **Daily Echo**: `allHighlights` passed to MainContentArea for Daily Echo random selection across all content types
 - **Notifications**: NotificationManager schedules daily highlights using user preferences from NotificationSettings
 - **Settings Management**: NotificationSettings persisted in SwiftData with automatic UI updates
-- **State Management**: Variables (`selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
-- **Component Communication**: BookSidebar receives book selection state and updates it via binding
+- **State Management**: Variables (`selectedContentType`, `selectedBook`, `sortByNewest`, `searchText`) managed in ContentView and passed as bindings
+- **Component Communication**: ContentSidebar receives both content type and book selection state, updates via bindings
+- **Adaptive Display**: MainContentArea renders WordCard or HighlightCard components based on selectedContentType
 - **Random Selection**: Daily Echo uses date-based seeding to show consistent random highlight with manual regenerate
-- **Visual Consistency**: Unified theming system ensures consistent appearance across components
+- **Visual Consistency**: Unified theming system ensures consistent appearance across both content types and card designs
 
 ## Development Guidelines
 
@@ -159,10 +168,10 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 
 ## File Structure
 - **NoteEcho/**: Main app source code
-  - **Views/**: Core view components (ContentView, HighlightCard, DailyEchoCard, SettingsView)
-  - **Components/**: Reusable UI components (BookSidebar, MainContentArea, SearchBar)
+  - **Views/**: Core view components (ContentView, HighlightCard, WordCard, DailyEchoCard, SettingsView)
+  - **Components/**: Reusable UI components (ContentSidebar, MainContentArea, SearchBar)
   - **Extensions/**: Swift extensions (Array+DailySelection for daily random logic)
-  - **Models/**: SwiftData models (Book, Highlight, NotificationSettings), NotificationManager, and AppleBooksDataService
+  - **Models/**: SwiftData models (Book, Highlight, NotificationSettings, ContentType), filtering services (HighlightFilterService), NotificationManager, and AppleBooksDataService
   - **Theme/**: Design system (AppTheme, AppTypography, Colors, BlurredGradientBackground)
 - **NoteEchoTests/**: Unit tests using Swift Testing
 - **NoteEchoUITests/**: UI tests using XCTest
@@ -189,6 +198,17 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Centralized**: AppTypography.swift provides semantic font styles
 - **Consistent**: All components use unified typography system
 - **Accessible**: Proper contrast and sizing across light/dark modes
+
+### Words & Highlights Categorization
+- **Automatic Categorization**: All content automatically split into Words (short snippets) and Highlights (longer passages)
+- **Words Criteria**: Content with fewer than 4 words AND fewer than 6 characters
+- **Highlights Criteria**: Content with 4+ words OR 6+ characters (everything not classified as Words)
+- **Dual Navigation**: ContentSidebar provides separate sections for each content type
+- **Adaptive Cards**: WordCard (compact horizontal layout) vs HighlightCard (full vertical layout)
+- **Unified Search**: Search and sort functionality works across both content types
+- **Book Filtering**: Available for Highlights section, Words section shows all short content
+- **Content Preservation**: No content is filtered out - everything is categorized and accessible
+- **Performance**: Efficient categorization using HighlightFilterService with database-level operations
 
 ### App Icon Configuration
 - **Asset Catalog**: Uses standard Xcode AppIcon.appiconset with individual PNG files for all required macOS sizes
