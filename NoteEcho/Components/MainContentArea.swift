@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Main Content Area Component
 struct MainContentArea: View {
+    let selectedContentType: ContentType
     @Binding var searchText: String
     @FocusState.Binding var isSearchFocused: Bool
     @Binding var sortByNewest: Bool
@@ -62,14 +63,14 @@ struct MainContentArea: View {
             .padding(.top, 16)
             .padding(.bottom, 16)
             
-            // MARK: - Highlights Display Area
+            // MARK: - Content Display Area
             if filteredHighlights.isEmpty {
                 // Empty state
                 VStack(spacing: 16) {
-                    Image(systemName: "highlighter")
+                    Image(systemName: selectedContentType.iconName)
                         .appFont(AppTypography.largeTitle)
                         .foregroundStyle(.secondary)
-                    Text("No highlights found")
+                    Text("No \(selectedContentType.displayName.lowercased()) found")
                         .appFont(AppTypography.title2Rounded)
                         .foregroundStyle(.secondary)
                     if !searchText.isEmpty {
@@ -80,19 +81,27 @@ struct MainContentArea: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                // Highlights list
+                // Content list - display different cards based on content type
                 ScrollView {
-                    LazyVStack(spacing: 20) {
+                    LazyVStack(spacing: selectedContentType == .words ? 8 : 20) {
                         ForEach(filteredHighlights, id: \.id) { highlight in
-                            HighlightCard(highlight: highlight)
-                                .padding(.horizontal)
-                                .transition(.asymmetric(
-                                    insertion: .scale(scale: 0.8).combined(with: .opacity),
-                                    removal: .scale(scale: 0.9).combined(with: .opacity)
-                                ))
+                            Group {
+                                if selectedContentType == .words {
+                                    WordCard(highlight: highlight)
+                                        .padding(.horizontal)
+                                } else {
+                                    HighlightCard(highlight: highlight)
+                                        .padding(.horizontal)
+                                }
+                            }
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                removal: .scale(scale: 0.9).combined(with: .opacity)
+                            ))
                         }
                     }
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: filteredHighlights)
+                    .animation(.easeInOut(duration: 0.3), value: selectedContentType)
                     .padding(.top, 8)
                     .padding(.bottom, 20)
                 }

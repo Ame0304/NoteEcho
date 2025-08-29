@@ -166,7 +166,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
   - **Theme/**: Design system (AppTheme, AppTypography, Colors, BlurredGradientBackground)
 - **NoteEchoTests/**: Unit tests using Swift Testing
 - **NoteEchoUITests/**: UI tests using XCTest
-- **Assets.xcassets/**: App icons and asset catalog
+- **Assets.xcassets/**: App icons and asset catalog with custom icon in multiple resolutions
 
 ## Development Notes
 
@@ -189,3 +189,10 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Centralized**: AppTypography.swift provides semantic font styles
 - **Consistent**: All components use unified typography system
 - **Accessible**: Proper contrast and sizing across light/dark modes
+
+### App Icon Configuration
+- **Asset Catalog**: Uses standard Xcode AppIcon.appiconset with individual PNG files for all required macOS sizes
+- **Icon Sizes**: 16x16, 32x32, 128x128, 256x256, 512x512 at both 1x and 2x resolutions (10 total files)
+- **Format**: PNG files extracted from .icns source using `iconutil -c iconset` command
+- **macOS Integration**: Proper Contents.json configuration ensures rounded corners and system integration
+- **Source**: Original app-icon-source.png available in project root for future updates

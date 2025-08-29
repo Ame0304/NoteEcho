@@ -14,6 +14,7 @@ struct ContentView: View {
     @Query(sort: \Highlight.createdDate, order: .reverse) private var allHighlights: [Highlight]
     
     // State variables - these hold the current UI state and trigger view updates when changed
+    @State private var selectedContentType: ContentType = .highlights  // Currently selected content type
     @State private var selectedBook: Book?     // Currently selected book for filtering (nil = all books)
     @State private var sortByNewest = true     // Sort direction: true = newest first, false = oldest first
     @State private var searchText = ""
@@ -37,8 +38,9 @@ struct ContentView: View {
     // Computed property that filters and sorts highlights based on current UI state
     // This automatically recalculates whenever any of the state variables change
     private var filteredHighlights: [Highlight] {
-        return HighlightFilterService.filteredHighlights(
+        return HighlightFilterService.filteredContent(
             from: allHighlights,
+            contentType: selectedContentType,
             selectedBook: selectedBook,
             searchText: searchText,
             sortByNewest: sortByNewest
@@ -65,14 +67,16 @@ struct ContentView: View {
             
             NavigationStack {
                 HSplitView {
-                    // MARK: - Book Sidebar
-                    BookSidebar(
+                    // MARK: - Content Sidebar
+                    ContentSidebar(
+                        selectedContentType: $selectedContentType,
                         selectedBook: $selectedBook,
                         books: booksWithHighlights
                     )
                     
                     // MARK: - Main Content Area
                     MainContentArea(
+                        selectedContentType: selectedContentType,
                         searchText: $searchText,
                         isSearchFocused: $isSearchFocused,
                         sortByNewest: $sortByNewest,

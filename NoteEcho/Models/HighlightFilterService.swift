@@ -3,18 +3,54 @@ import Foundation
 // MARK: - Highlight Filtering Service
 struct HighlightFilterService {
     
-    /// Filters and sorts highlights based on provided criteria
+    /// Categorizes highlights into Words and Highlights based on content length
+    static func categorizeHighlights(from highlights: [Highlight]) -> (words: [Highlight], highlights: [Highlight]) {
+        let words = highlights.filter { highlight in
+            let wordCount = highlight.content.split(separator: " ").count
+            let charCount = highlight.content.trimmingCharacters(in: .whitespacesAndNewlines).count
+            return wordCount < 4 && charCount < 6  // Less than 4 words AND less than 6 characters
+        }
+        
+        let regularHighlights = highlights.filter { highlight in
+            let wordCount = highlight.content.split(separator: " ").count
+            let charCount = highlight.content.trimmingCharacters(in: .whitespacesAndNewlines).count
+            return wordCount >= 4 || charCount >= 6  // 4+ words OR 6+ characters
+        }
+        
+        return (words: words, highlights: regularHighlights)
+    }
+    
+    /// Filters highlights by content type and other criteria
+    static func filteredContent(
+        from highlights: [Highlight],
+        contentType: ContentType,
+        selectedBook: Book?,
+        searchText: String,
+        sortByNewest: Bool
+    ) -> [Highlight] {
+        let (words, regularHighlights) = categorizeHighlights(from: highlights)
+        let contentToFilter = contentType == .words ? words : regularHighlights
+        
+        return contentToFilter
+            .filterByBook(selectedBook)
+            .filterBySearchText(searchText)
+            .sortByDate(newest: sortByNewest)
+    }
+    
+    /// Legacy method for backwards compatibility - returns only regular highlights
     static func filteredHighlights(
         from highlights: [Highlight],
         selectedBook: Book?,
         searchText: String,
         sortByNewest: Bool
     ) -> [Highlight] {
-        return highlights
-            .filterByBook(selectedBook)
-            .filterBySearchText(searchText)
-            .filterByMinimumWordCount()
-            .sortByDate(newest: sortByNewest)
+        return filteredContent(
+            from: highlights,
+            contentType: .highlights,
+            selectedBook: selectedBook,
+            searchText: searchText,
+            sortByNewest: sortByNewest
+        )
     }
     
     /// Filters books to only show those with highlights
@@ -40,13 +76,6 @@ private extension Array where Element == Highlight {
         }
     }
     
-    func filterByMinimumWordCount() -> [Highlight] {
-        return self.filter { highlight in
-            let wordCount = highlight.content.split(separator: " ").count
-            let charCount = highlight.content.trimmingCharacters(in: .whitespacesAndNewlines).count
-            return wordCount >= 3 || charCount >= 6  // 3+ words OR 6+ characters for Chinese
-        }
-    }
     
     func sortByDate(newest: Bool) -> [Highlight] {
         return self.sorted { 
