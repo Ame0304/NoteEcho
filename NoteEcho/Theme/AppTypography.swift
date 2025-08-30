@@ -9,7 +9,7 @@ struct AppTypography {
         static let title: CGFloat = 30
         static let headline: CGFloat = 16
         static let body: CGFloat = 14
-        static let caption: CGFloat = 10
+        static let caption: CGFloat = 12
     }
     
     // MARK: - Font Weights

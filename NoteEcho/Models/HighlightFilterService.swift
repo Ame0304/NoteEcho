@@ -104,6 +104,14 @@ struct HighlightFilterService {
     static func booksWithHighlights(from books: [Book]) -> [Book] {
         return books.filter { !$0.highlights.isEmpty }
     }
+    
+    /// Filters books to only show those with actual highlights (not just words)
+    static func booksWithActualHighlights(from books: [Book]) -> [Book] {
+        return books.filter { book in
+            let (_, regularHighlights) = categorizeHighlights(from: Array(book.highlights))
+            return !regularHighlights.isEmpty
+        }
+    }
 }
 
 // MARK: - Array Extensions for Highlight Filtering

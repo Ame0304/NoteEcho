@@ -20,11 +20,10 @@ struct ContentView: View {
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
     @State private var isRefreshing = false
-    @State private var sidebarWidth: Double = 200  // Resizable sidebar width (150-400px range)
     
-    // Computed property that filters books to only show those with highlights
+    // Computed property that filters books to only show those with actual highlights (not just words)
     private var booksWithHighlights: [Book] {
-        let filteredBooks = HighlightFilterService.booksWithHighlights(from: books)
+        let filteredBooks = HighlightFilterService.booksWithActualHighlights(from: books)
         
         // If currently selected book has no highlights, deselect it
         if let selectedBook = selectedBook, !filteredBooks.contains(where: { $0.id == selectedBook.id }) {
@@ -72,8 +71,7 @@ struct ContentView: View {
                     ContentSidebar(
                         selectedContentType: $selectedContentType,
                         selectedBook: $selectedBook,
-                        books: booksWithHighlights,
-                        sidebarWidth: $sidebarWidth
+                        books: booksWithHighlights
                     )
                     
                     // MARK: - Main Content Area

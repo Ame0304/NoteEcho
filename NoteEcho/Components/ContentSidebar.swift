@@ -5,7 +5,6 @@ struct ContentSidebar: View {
     @Binding var selectedContentType: ContentType
     @Binding var selectedBook: Book?
     let books: [Book]
-    @Binding var sidebarWidth: Double
     @Environment(\.colorScheme) private var colorScheme
     
     private var theme: AppTheme {
@@ -63,7 +62,7 @@ struct ContentSidebar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 16)
-        .frame(minWidth: 150, idealWidth: sidebarWidth, maxWidth: 400)
+        .frame(width: 250)
         .controlBackground(theme: theme, colorScheme: colorScheme)
     }
 }
