@@ -60,13 +60,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Relationship**: One-to-many (Book → Highlights) with cascade delete
 - **Storage**: SwiftData with ModelContainer configured in NoteEchoApp.swift
 - **Data Source**: Real Apple Books highlights imported from SQLite databases
-- **Categorization**: HighlightFilterService automatically categorizes content based on length (words <4 words AND <6 chars, highlights for everything else)
+- **Categorization**: HighlightFilterService automatically categorizes content with language-specific logic (English: ≤4 words = Words, Chinese: ≤12 characters = Words)
 
 ### View Hierarchy
 ```
 NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 ├── ContentView (Main interface with HSplitView and dual content type support)
-│   ├── ContentSidebar (Fixed 200px width - dual section navigation)
+│   ├── ContentSidebar (Resizable 150-400px width - dual section navigation)
 │   │   ├── Words Section
 │   │   │   └── "All Words" option with textformat icon
 │   │   └── Highlights Section  
@@ -87,7 +87,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 
 ### Key Components
 - **ContentView**: Main coordinator with HSplitView layout, dual content type state management, and centralized filtering
-- **ContentSidebar**: Dual-section navigation sidebar with Words/Highlights categorization and dynamic book filtering
+- **ContentSidebar**: Resizable navigation sidebar (150-400px) with Words/Highlights categorization and always-visible book filtering
 - **MainContentArea**: Content-aware display area with adaptive card rendering based on selected content type
 - **WordCard**: Compact component optimized for short content with horizontal layout and minimal padding
 - **HighlightCard**: Full-featured component for longer content with vertical layout and comprehensive metadata display
@@ -109,7 +109,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 ### Data Flow
 - **Data Import**: AppleBooksDataService loads real highlights from Apple Books SQLite databases on app launch
 - **SwiftData Integration**: `@Query` automatically fetches and updates imported data in ContentView
-- **Content Categorization**: HighlightFilterService automatically categorizes all content into Words (<4 words AND <6 chars) and Highlights (everything else) using `categorizeHighlights()`
+- **Content Categorization**: HighlightFilterService automatically categorizes content with language detection - English uses word count (≤4 words = Words), Chinese uses character count (≤12 characters = Words)
 - **Type-Aware Filtering**: `filteredContent()` method applies book, search, and sort filters based on selected content type
 - **Daily Echo**: `allHighlights` passed to MainContentArea for Daily Echo random selection across all content types
 - **Notifications**: NotificationManager schedules daily highlights using user preferences from NotificationSettings
@@ -136,9 +136,9 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Settings Persistence**: NotificationSettings SwiftData model with automatic UI synchronization
 - **Window Management**: Multiple SwiftUI windows (main app + settings) with proper environment object sharing
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
-- **Content Filtering**: Minimum word count filtering excludes highlights with fewer than 3 words or 6 characters (supports both Western and Chinese text)
+- **Content Filtering**: Language-aware categorization with automatic detection (English: word count, Chinese: character count)
 - **Shared UI Components**: SharedControlStyles provides consistent styling across all controls with theme support
-- **Two-Column Layout**: HSplitView with fixed sidebar (200px) and flexible main content area
+- **Two-Column Layout**: HSplitView with resizable sidebar (150-400px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
 - **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension with regenerate override capability
 - **Unified Card Design**: Content extraction pattern to avoid nested styling while maintaining functionality
@@ -149,7 +149,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Animation Patterns**: Smooth easing curves for rotations, asymmetric transitions, hover border effects, and polished interactive feedback
 
 ### UI Implementation Notes
-- **Sidebar Design**: Fixed-width (200px) with scrollable content, hover states, and selection indicators
+- **Sidebar Design**: Resizable width (150-400px) with scrollable content, hover states, and selection indicators
 - **Daily Echo Layout**: Featured section at top with unified card design, enhanced styling, and theme color consistency
 - **Main Content Layout**: Daily Echo above search/sort controls for prominent positioning and user attention
 - **Component Composition**: Clean separation between BookSidebar and MainContentArea for maintainability
@@ -200,9 +200,11 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Accessible**: Proper contrast and sizing across light/dark modes
 
 ### Words & Highlights Categorization
-- **Automatic Categorization**: All content automatically split into Words (short snippets) and Highlights (longer passages)
-- **Words Criteria**: Content with fewer than 4 words AND fewer than 6 characters
-- **Highlights Criteria**: Content with 4+ words OR 6+ characters (everything not classified as Words)
+- **Automatic Categorization**: All content automatically split into Words (short snippets) and Highlights (longer passages) with language detection
+- **English Words Criteria**: Content with 4 words or fewer (≤4 words)
+- **Chinese Words Criteria**: Content with 12 Chinese characters or fewer (≤12 characters)
+- **Language Detection**: Automatic detection based on CJK character ratio (>30% = Chinese)
+- **Highlights Criteria**: Content exceeding the respective language thresholds
 - **Dual Navigation**: ContentSidebar provides separate sections for each content type
 - **Adaptive Cards**: WordCard (compact horizontal layout) vs HighlightCard (full vertical layout)
 - **Unified Search**: Search and sort functionality works across both content types

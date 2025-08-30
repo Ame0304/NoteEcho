@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
     @State private var isRefreshing = false
+    @State private var sidebarWidth: Double = 200  // Resizable sidebar width (150-400px range)
     
     // Computed property that filters books to only show those with highlights
     private var booksWithHighlights: [Book] {
@@ -71,7 +72,8 @@ struct ContentView: View {
                     ContentSidebar(
                         selectedContentType: $selectedContentType,
                         selectedBook: $selectedBook,
-                        books: booksWithHighlights
+                        books: booksWithHighlights,
+                        sidebarWidth: $sidebarWidth
                     )
                     
                     // MARK: - Main Content Area

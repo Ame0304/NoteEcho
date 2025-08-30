@@ -5,6 +5,7 @@ struct ContentSidebar: View {
     @Binding var selectedContentType: ContentType
     @Binding var selectedBook: Book?
     let books: [Book]
+    @Binding var sidebarWidth: Double
     @Environment(\.colorScheme) private var colorScheme
     
     private var theme: AppTheme {
@@ -12,40 +13,35 @@ struct ContentSidebar: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // MARK: - Words Section
-            VStack(alignment: .leading, spacing: 8) {
-                SectionHeader(title: "Words", icon: "textformat", theme: theme)
-                
-                ContentListItem(
-                    title: "All Words",
-                    icon: "textformat",
-                    isSelected: selectedContentType == .words,
-                    theme: theme
-                ) {
-                    selectedContentType = .words
-                    selectedBook = nil  // Reset book selection when switching to Words
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            // MARK: - Words Navigation Item
+            ContentListItem(
+                title: "Words",
+                icon: "textformat",
+                isSelected: selectedContentType == .words,
+                theme: theme
+            ) {
+                selectedContentType = .words
+                selectedBook = nil  // Reset book selection when switching to Words
             }
+            .padding(.bottom, 12)
             
-            // MARK: - Highlights Section  
-            VStack(alignment: .leading, spacing: 8) {
-                SectionHeader(title: "Highlights", icon: "highlighter", theme: theme)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    // "All Highlights" option
-                    ContentListItem(
-                        title: "All Highlights",
-                        icon: "highlighter",
-                        isSelected: selectedContentType == .highlights && selectedBook == nil,
-                        theme: theme
-                    ) {
-                        selectedContentType = .highlights
-                        selectedBook = nil
-                    }
-                    
-                    // Individual books (only shown when Highlights is selected)
-                    if selectedContentType == .highlights {
+            // MARK: - All Highlights Navigation Item
+            ContentListItem(
+                title: "All Highlights",
+                icon: "highlighter",
+                isSelected: selectedContentType == .highlights && selectedBook == nil,
+                theme: theme
+            ) {
+                selectedContentType = .highlights
+                selectedBook = nil
+            }
+            .padding(.bottom, 8)
+            
+            // MARK: - Books List (Always Visible)
+            if !books.isEmpty {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 2) {
                         ForEach(books, id: \.id) { book in
                             ContentListItem(
                                 title: book.title,
@@ -58,38 +54,20 @@ struct ContentSidebar: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 4)
                 }
+                .frame(maxHeight: 300)
             }
             
             Spacer()
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 16)
-        .frame(width: 200)
+        .frame(minWidth: 150, idealWidth: sidebarWidth, maxWidth: 400)
         .controlBackground(theme: theme, colorScheme: colorScheme)
     }
 }
 
-// MARK: - Section Header
-private struct SectionHeader: View {
-    let title: String
-    let icon: String
-    let theme: AppTheme
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .appFont(AppTypography.captionMedium)
-                .foregroundStyle(theme.themeColor)
-            
-            Text(title)
-                .appFont(AppTypography.bodyBold)
-                .foregroundStyle(theme.themeColor)
-        }
-        .padding(.horizontal, 8)
-        .padding(.bottom, 4)
-    }
-}
 
 // MARK: - Content List Item
 private struct ContentListItem: View {
@@ -105,12 +83,12 @@ private struct ContentListItem: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .appFont(AppTypography.caption)
+                    .appFont(AppTypography.body)
                     .foregroundStyle(isSelected ? Color.white : theme.secondaryTextColor)
-                    .frame(width: 14)
+                    .frame(width: 16)
                 
                 Text(title)
-                    .appFont(AppTypography.captionMedium)
+                    .appFont(AppTypography.bodyMedium)
                     .foregroundStyle(isSelected ? Color.white : Color.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
