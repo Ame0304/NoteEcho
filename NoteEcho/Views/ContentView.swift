@@ -89,7 +89,7 @@ struct ContentView: View {
                 }
                 .navigationTitle("NoteEcho")
                 .toolbar {
-                    ToolbarItem(placement: .secondaryAction) {
+                    ToolbarItem(placement: .primaryAction) {
                         Button(action: {
                             openWindow(id: "settings")
                         }) {
