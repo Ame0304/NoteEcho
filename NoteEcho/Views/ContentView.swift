@@ -9,6 +9,9 @@ struct ContentView: View {
     // Notification manager
     @EnvironmentObject private var notificationManager: NotificationManager
     
+    // Window management
+    @Environment(\.openWindow) private var openWindow
+    
     // SwiftData queries - optimized with sorting at database level
     @Query(sort: \Book.title, order: .forward) private var books: [Book]
     @Query(sort: \Highlight.createdDate, order: .reverse) private var allHighlights: [Highlight]
@@ -86,6 +89,15 @@ struct ContentView: View {
                 }
                 .navigationTitle("NoteEcho")
                 .toolbar {
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button(action: {
+                            openWindow(id: "settings")
+                        }) {
+                            Image(systemName: "gearshape.fill")
+                        }
+                        .pointingHandCursor()
+                    }
+                    
                     ToolbarItem(placement: .primaryAction) {
                         Button(action: refreshData) {
                             if isRefreshing {

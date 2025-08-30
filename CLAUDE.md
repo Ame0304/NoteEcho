@@ -87,13 +87,13 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 
 ### Key Components
 - **ContentView**: Main coordinator with HSplitView layout, dual content type state management, and centralized filtering
-- **ContentSidebar**: Resizable navigation sidebar (150-400px) with Words/Highlights categorization and always-visible book filtering
+- **ContentSidebar**: Fixed-width navigation sidebar (250px) with Words/Highlights categorization and intelligent book filtering (only shows books with actual highlights)
 - **MainContentArea**: Content-aware display area with adaptive card rendering based on selected content type
 - **WordCard**: Compact component optimized for short content with horizontal layout and minimal padding
 - **HighlightCard**: Full-featured component for longer content with vertical layout and comprehensive metadata display
 - **DailyEchoCard**: Featured component displaying a random daily highlight from all content with enhanced styling and regenerate functionality
 - **SettingsView**: Dedicated settings window with streamlined notification preferences and manual save system
-- **HighlightFilterService**: Core filtering service with content categorization logic and type-aware filtering methods
+- **HighlightFilterService**: Core filtering service with content categorization logic, type-aware filtering methods, and intelligent book filtering (distinguishes between books with Words vs Highlights content)
 - **NotificationManager**: Handles daily highlight notifications using UserNotifications framework with customizable scheduling
 - **AppleBooksDataService**: Imports real highlights from Apple Books SQLite databases with fallback error handling
 
@@ -138,7 +138,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Search Implementation**: Multi-field search (content, notes, book titles) with case-insensitive matching
 - **Content Filtering**: Language-aware categorization with automatic detection (English: word count, Chinese: character count)
 - **Shared UI Components**: SharedControlStyles provides consistent styling across all controls with theme support
-- **Two-Column Layout**: HSplitView with resizable sidebar (150-400px) and flexible main content area
+- **Two-Column Layout**: HSplitView with fixed-width sidebar (250px) and flexible main content area
 - **Component Architecture**: Modular components with clear separation of concerns
 - **Daily Random Selection**: Date-based seeding for consistent daily highlight selection using Array extension with regenerate override capability
 - **Unified Card Design**: Content extraction pattern to avoid nested styling while maintaining functionality
@@ -149,7 +149,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Animation Patterns**: Smooth easing curves for rotations, asymmetric transitions, hover border effects, and polished interactive feedback
 
 ### UI Implementation Notes
-- **Sidebar Design**: Resizable width (150-400px) with scrollable content, hover states, and selection indicators
+- **Sidebar Design**: Fixed width (250px) with scrollable content, hover states, and selection indicators
 - **Daily Echo Layout**: Featured section at top with unified card design, enhanced styling, and theme color consistency
 - **Main Content Layout**: Daily Echo above search/sort controls for prominent positioning and user attention
 - **Component Composition**: Clean separation between BookSidebar and MainContentArea for maintainability
@@ -208,7 +208,7 @@ NoteEchoApp (App entry point with ModelContainer + NotificationManager)
 - **Dual Navigation**: ContentSidebar provides separate sections for each content type
 - **Adaptive Cards**: WordCard (compact horizontal layout) vs HighlightCard (full vertical layout)
 - **Unified Search**: Search and sort functionality works across both content types
-- **Book Filtering**: Available for Highlights section, Words section shows all short content
+- **Smart Book Filtering**: Available for Highlights section and only shows books containing actual highlights (not books with only Words), Words section shows all short content
 - **Content Preservation**: No content is filtered out - everything is categorized and accessible
 - **Performance**: Efficient categorization using HighlightFilterService with database-level operations
 

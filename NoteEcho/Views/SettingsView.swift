@@ -337,19 +337,17 @@ struct SettingsView: View {
                     Text("Saving...")
                 case .success:
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
                     Text("Saved!")
-                        .foregroundColor(.green)
                 case .hidden:
                     EmptyView()
                 }
             }
             .appFont(AppTypography.bodyBold)
-            .foregroundColor(saveButtonState == .success ? .green : .white)
+            .foregroundColor(.white)
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
-        .tint(saveButtonState == .success ? .green : theme.themeColor)
+        .tint(theme.themeColor)
         .disabled(saveButtonState == .saving || saveButtonState == .success)
         .frame(maxWidth: .infinity)
     }
