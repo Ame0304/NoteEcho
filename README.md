@@ -38,12 +38,6 @@ A macOS app for exploring and organizing your book highlights from Apple Books.
 2. Open `NoteEcho.xcodeproj` in Xcode
 3. Build and run with `⌘+R`
 
-### For Distribution
-The app includes distribution scripts:
-- `./Scripts/build-release.sh` - Create optimized build
-- `./Scripts/create-dmg.sh` - Package into DMG
-- See full distribution guide in the project
-
 ## How It Works
 
 NoteEcho reads your existing highlights directly from Apple Books' SQLite databases. Your highlights are automatically categorized into Words and Highlights based on length, with smart language detection for English and Chinese content.
