@@ -27,7 +27,7 @@ A macOS app for exploring and organizing your book highlights from Apple Books.
 
 ## Requirements
 
-- macOS (SwiftUI app)
+- macOS 14.0+ (SwiftUI app)
 - Apple Books with existing highlights
 - Xcode for development
 
@@ -78,11 +78,3 @@ Built with:
 ## Privacy
 
 NoteEcho accesses your Apple Books highlights locally. No data is transmitted or stored externally. The app operates entirely offline with your existing highlight data.
-
-## License
-
-[Add your chosen license here]
-
-## Contributing
-
-[Add contribution guidelines if desired]
